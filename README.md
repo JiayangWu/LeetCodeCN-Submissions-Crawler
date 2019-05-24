@@ -29,7 +29,7 @@
                    "scala": ".scl", "kotlin": ".kt", "rust": ".rs"}
 2. 致谢@fyears， 本脚本的login函数来自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
 3. config.json里的time代表爬多少天之内的submission，比如我每天爬今天提交的题解，就是设置为0.8就好了，如果第一次使用需要爬所有的题解，就设一个大一点的数比如1000之类的。
-
+4. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 # 版本介绍
 当前版本V1.0, 于2019/5/24上传
 1. 目前支持爬取力扣中国（leetcode-cn.com)上的个人提交的代码
