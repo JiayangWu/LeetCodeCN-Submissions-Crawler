@@ -20,6 +20,9 @@
 3. 配置config.json文件，用户名，密码，本地存储地址，时间控制（天）
 4. python3 main.py
 
+# 项目演示
+![image](https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler/blob/master/demo.gif)
+这个GIF是由LICEcap V1.28生成的，下载地址https://www.cockos.com/licecap/
 # 一些说明
 1. 目前支持的语言有：{"cpp": ".cpp", "python3": ".py", "python": ".py", "mysql": ".sql", "golang": ".go", "java": ".java",
                    "c": ".c", "javascript": ".js", "php": ".php", "csharp": ".cs", "ruby": ".rb", "swift": ".swift",
@@ -30,7 +33,7 @@
 # 版本介绍
 当前版本V1.0, 于2019/5/24上传
 1. 目前支持爬取力扣中国（leetcode-cn.com)上的个人提交的代码
-2. 支持时间控制，即可以自由选择爬取前多少天之内的代码，比如30天内，2天内
+2. 支持时间控制，即可以自由选择爬取**前多少天之内**的代码，比如30天内，2天内
 3. 一键上传Github，注意本功能需要**手动init**
 4. 在config.json里调整参数
 5. **注意保护个人用户名及密码**
