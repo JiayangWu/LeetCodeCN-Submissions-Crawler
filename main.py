@@ -1,6 +1,6 @@
 #/usr/bin/env python3
 """
-这是一个将力扣中国(leetcode-cn.com)上的submission自动爬到本地并push到github上的爬虫脚本。
+这是一个将力扣中国(leetcode-cn.com)上的【个人提交】的submission自动爬到本地并push到github上的爬虫脚本。
 请使用相同目录下的config.json设置 用户名，密码，本地储存目录等参数。
 致谢@fyears， 本脚本的login函数来自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
 """
@@ -43,8 +43,7 @@ def login(email, password): # 本函数copy自https://gist.github.com/fyears/487
             client.get(sign_in_url, verify=False)
             csrftoken = client.cookies['csrftoken']
             login_data = {'login': email, 
-                'password': password,
-                'csrfmiddlewaretoken': csrftoken
+                'password': password
             }
             result = client.post(sign_in_url, data=login_data, headers=dict(Referer=sign_in_url))
             
@@ -78,6 +77,9 @@ def scraping(client):
         t = time.time()
         invalidset = set()
         html = json.loads(h.text)
+        if "submissions_dump" not in html:
+            print ("Warning! No previous submission is detected, please make sure you are logging in the correct account AND you once submitted codes on leetcode-cn.com")
+            break
         for idx, submission in enumerate((html["submissions_dump"])):
             Status = submission['status_display']
             Title = submission['title'].replace(" ","")
