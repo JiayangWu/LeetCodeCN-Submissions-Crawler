@@ -1,9 +1,9 @@
 {
- "username": "ABCD@163.com",
-    
-"password": "12345678",
- 
-"outputDir": "C://yyyyy//jjjjj//kkkkk//"
-, 
-"time": 1
+  "username": "yourusername",
+
+  "password": "yourpasswd",
+
+  "outputDir": "C:\\Users\\username\\code\\leetcodecn",
+
+  "time": 30
 }
