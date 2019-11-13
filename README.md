@@ -32,8 +32,14 @@
 2. 致谢@fyears， 本脚本的login函数来自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
 3. config.json里的time代表爬多少天之内的submission，比如我每天爬今天提交的题解，就是设置为0.8就好了，如果第一次使用需要爬所有的题解，就设一个大一点的数比如1000之类的。
 4. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
+
 # 版本介绍
-当前版本V1.1, 于2019/8/8上传
+当前版本V1.2，于2019/11/13上传
+1. 由于力扣网站登录方式变动，需要解决登录无限失败的问题，小改了login函数
+2. 更新ProblemList至题号1255， 新的题号需要在ProblemList里手动添加
+3. 修复ProbelmListGenerator.py读取txt文件时，文件编码gbk报错的bug
+
+历史版本V1.1, 于2019/8/8上传
 1. 由于力扣网站登录方式变动，需要解决登录无限失败的问题，小改了login函数
 2. 更新ProblemList至题号1147， 新的题号需要在ProblemList里手动添加
 3. 新增一个ProblemListGenerator函数，用于生成新的ProblemList
