@@ -41,10 +41,11 @@ def login(email, password): # 本函数copy自https://gist.github.com/fyears/487
     while True:
         try:
             client.get(sign_in_url, verify=False)
-            csrftoken = client.cookies['csrftoken']
+
             login_data = {'login': email, 
                 'password': password
             }
+            
             result = client.post(sign_in_url, data=login_data, headers=dict(Referer=sign_in_url))
             
             if result.ok:
@@ -58,7 +59,7 @@ def login(email, password): # 本函数copy自https://gist.github.com/fyears/487
 
 def scraping(client):
     page_num = START_PAGE
-    visited = [0 for _ in range(1200)]
+    visited = [0 for _ in range(2000)]
 
     file_format = {"cpp": ".cpp", "python3": ".py", "python": ".py", "mysql": ".sql", "golang": ".go", "java": ".java",
                    "c": ".c", "javascript": ".js", "php": ".php", "csharp": ".cs", "ruby": ".rb", "swift": ".swift",
@@ -122,8 +123,7 @@ def scraping(client):
                             print ("Writing ends!", totalpath)
                             visited[Pid] = 1 #保障每道题只记录最新的AC解
             except:
-                with open("Log.txt", "a") as log:
-                    log.write("Unknown error happened for ", Title)
+                print("Unknown bug happned!")
             
         page_num += 1
 
