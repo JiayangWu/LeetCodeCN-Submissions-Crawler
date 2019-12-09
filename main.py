@@ -76,6 +76,7 @@ def scraping(client):
         if "submissions_dump" not in html:
             print ("Warning! No previous submission is detected, please make sure you are logging in the correct account AND you once submitted codes on leetcode-cn.com")
             break
+            
         for idx, submission in enumerate((html["submissions_dump"])):
             Status = submission['status_display']
             Title = submission['title'].replace(" ","")
@@ -117,8 +118,10 @@ def scraping(client):
                             f.write(submission['code'])
                             print ("Writing ends!", totalpath)
                             visited[Pid] = 1 #保障每道题只记录最新的AC解
+                            
             except FileNotFoundError as e:
                 print("Output directory doesn't exist")
+                
             except Exception as e:
                 print(e)
             
@@ -127,13 +130,10 @@ def scraping(client):
 def git_push():
     today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
     os.chdir(OUTPUT_DIR)
-    print (os.getcwd())
-    instructions = ["git add .","git status", "git commit -m \""+ today, "git push -u origin master"]
+    instructions = ["git add .","git status", "git commit -m \""+ today + "\"", "git push -u origin master"]
     for ins in instructions:
         os.system(ins)
-        # print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print ("~~~~~~~~~~~~~" + ins + " finished! ~~~~~~~~")
-        # print ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 def main():
     email = USERNAME
@@ -147,7 +147,7 @@ def main():
     print('end scrapping')
 
     git_push()
-    print('Git PUSH finished')
+    print('Git push finished')
 
 if __name__ == '__main__':
     main()
