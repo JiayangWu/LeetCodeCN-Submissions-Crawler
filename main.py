@@ -64,17 +64,12 @@ def scraping(client):
     file_format = {"cpp": ".cpp", "python3": ".py", "python": ".py", "mysql": ".sql", "golang": ".go", "java": ".java",
                    "c": ".c", "javascript": ".js", "php": ".php", "csharp": ".cs", "ruby": ".rb", "swift": ".swift",
                    "scala": ".scl", "kotlin": ".kt", "rust": ".rs"}
-
-    submissions_url = "https://leetcode-cn.com/api/submissions/?offset=" + str(page_num) + "&limit=20&lastkey="
     
     while True:
         print ("Now for page:", str(page_num))
-        if page_num == START_PAGE:
-            h = client.get(submissions_url, verify=False)
-        else:
-            submissions_url = submissions_url.replace("offset=" + str(page_num -1), "offset=" + str(page_num))
-            h = client.get(submissions_url, verify=False)
+        submissions_url = "https://leetcode-cn.com/api/submissions/?offset=" + str(page_num) + "&limit=20&lastkey="
 
+        h = client.get(submissions_url, verify=False)
         t = time.time()
         invalidset = set()
         html = json.loads(h.text)
@@ -106,7 +101,7 @@ def scraping(client):
 
                 else:
                     if visited[Pid] != 1:
-                        newpath = OUTPUT_DIR + "./" + '{:0=4}'.format(Pid) + "." + Title #存放的文件夹名
+                        newpath = OUTPUT_DIR + "/" + '{:0=4}'.format(Pid) + "." + Title #存放的文件夹名
                         if not os.path.exists(newpath):
                             os.mkdir(newpath)
 
@@ -122,10 +117,12 @@ def scraping(client):
                             f.write(submission['code'])
                             print ("Writing ends!", totalpath)
                             visited[Pid] = 1 #保障每道题只记录最新的AC解
-            except:
-                print("Unknown bug happned!")
+            except FileNotFoundError as e:
+                print("Output directory doesn't exist")
+            except Exception as e:
+                print(e)
             
-        page_num += 1
+        page_num += 20
 
 def git_push():
     today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
