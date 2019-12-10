@@ -34,17 +34,22 @@
 4. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍
-当前版本V1.2，于2019/11/13上传
+当前版本V1.3，于2019/12/09上传
+1. 修改爬虫逻辑并优化路径设置，感谢[@VirgilChen97](https://github.com/VirgilChen97)
+3. 修复git push时双引号不匹配的报错
+4. 修复write函数只能接受一个参数的报错
+
+历史版本V1.2，于2019/11/13上传
 1. 由于力扣网站登录方式变动，需要解决登录无限失败的问题，小改了login函数
-2. 更新ProblemList至题号1255， 新的题号需要在ProblemList里手动添加
+2. 更新ProblemList至题号1255，新的题号需要在ProblemList里手动添加
 3. 修复ProbelmListGenerator.py读取txt文件时，文件编码gbk报错的bug
 
-历史版本V1.1, 于2019/8/8上传
+历史版本V1.1，于2019/8/8上传
 1. 由于力扣网站登录方式变动，需要解决登录无限失败的问题，小改了login函数
 2. 更新ProblemList至题号1147， 新的题号需要在ProblemList里手动添加
 3. 新增一个ProblemListGenerator函数，用于生成新的ProblemList
 
-历史版本V1.0, 于2019/5/24上传
+历史版本V1.0，于2019/5/24上传
 1. 目前支持爬取力扣中国（leetcode-cn.com)上的个人提交的代码
 2. 支持时间控制，即可以自由选择爬取**前多少天之内**的代码，比如30天内，2天内
 3. 一键上传Github，注意本功能需要**手动init**
