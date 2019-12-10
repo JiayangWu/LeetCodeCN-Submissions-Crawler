@@ -93,10 +93,10 @@ def scraping(client):
                 Pid = GetProblemId(Title)
                 
                 if Pid == 0 or Title in invalidset:
-                    print (Title + "Failed ! Due to unknown Pid! ")
+                    print (Title + " failed! Due to unknown Pid! ")
                     if Title not in invalidset: #第一次没找到
                         with open("Log.txt", "a") as log:
-                            log.write("Unknown PID happened for ", Title)
+                            log.write("Unknown PID happened for " + Title)
 
                         invalidset.add(Title)
 
