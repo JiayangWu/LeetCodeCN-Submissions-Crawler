@@ -41,12 +41,12 @@ def login(email, password): # 本函数copy自https://gist.github.com/fyears/487
     while True:
         try:
             client.get(sign_in_url, verify=False)
-            csrftoken = client.cookies['csrftoken']
             login_data = {'login': email, 
-                'password': password
+                'password': password,
             }
+            # print (login_data)
             result = client.post(sign_in_url, data=login_data, headers=dict(Referer=sign_in_url))
-            
+
             if result.ok:
                 print ("Login successfully!")
                 break
