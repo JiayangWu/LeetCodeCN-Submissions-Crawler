@@ -34,7 +34,11 @@
 4. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍
-当前版本V1.3，于2019/12/09上传
+当前版本V1.4，于2020/03/01上传
+1. 更新ProblemList至题号1368，新的题号需要在ProblemList里手动添加
+2. 新增对面试题的爬虫支持
+
+历史版本V1.3，于2019/12/09上传
 1. 修改爬虫逻辑并优化路径设置，感谢[@VirgilChen97](https://github.com/VirgilChen97)
 3. 修复git push时双引号不匹配的报错
 4. 修复write函数只能接受一个参数的报错
