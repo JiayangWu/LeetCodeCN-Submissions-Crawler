@@ -34,7 +34,7 @@ START_PAGE = 0  # 从哪一页submission开始爬起，0是最新的一页
 sleep_time = 5  # in second，登录失败时的休眠时间
 #~~~~~~~~~~~~以上是可以修改的参数~~~~~~~~~~~~~~~~·
 
-def login(email, password): # 本函数copy自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba，感谢@fyears
+def login(email, password): # 本函数修改自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba，感谢@fyears
     client = requests.session()
     client.encoding = "utf-8"
 
@@ -59,7 +59,7 @@ def login(email, password): # 本函数copy自https://gist.github.com/fyears/487
 
 def scraping(client):
     page_num = START_PAGE
-    visited = [0 for _ in range(2000)]
+    visited = set()
 
     file_format = {"cpp": ".cpp", "python3": ".py", "python": ".py", "mysql": ".sql", "golang": ".go", "java": ".java",
                    "c": ".c", "javascript": ".js", "php": ".php", "csharp": ".cs", "ruby": ".rb", "swift": ".swift",
@@ -82,8 +82,9 @@ def scraping(client):
             Title = submission['title'].replace(" ","")
             Lang = submission['lang']
 
+            
             if Status != "Accepted":
-                print (Title + " is not Accepted, continue for the next submission")
+                print (Title + " was not Accepted, continue for the next submission")
                 continue
 
             if t - submission['timestamp'] > TIME_CONTROL: #时间管理，本行代表只记录最近的TIME_CONTROL天内的提交记录
@@ -92,7 +93,7 @@ def scraping(client):
             try:
                 Pid = GetProblemId(Title)
                 
-                if Pid == 0 or Title in invalidset:
+                if Pid == "0" or Title in invalidset:
                     print (Title + " failed! Due to unknown Pid! ")
                     if Title not in invalidset: #第一次没找到
                         with open("Log.txt", "a") as log:
@@ -101,23 +102,24 @@ def scraping(client):
                         invalidset.add(Title)
 
                 else:
-                    if visited[Pid] != 1:
-                        newpath = OUTPUT_DIR + "/" + '{:0=4}'.format(Pid) + "." + Title #存放的文件夹名
+                    if Pid not in visited:
+
+                        if type(Pid) == type(0): # 如果题目是传统的数字题号
+                            newpath = OUTPUT_DIR + "/" + '{:0=4}'.format(Pid) + "." + Title #存放的文件夹名
+                            filename = '{:0=4}'.format(Pid) + "-" + Title + file_format[Lang] #存放的文件名
+                        else: # 如果题目是新的面试题
+                            newpath = OUTPUT_DIR + "/" + Pid + "." + Title
+                            filename = Pid + "-" + Title + file_format[Lang] #存放的文件名
+
                         if not os.path.exists(newpath):
                             os.mkdir(newpath)
 
-                        filename = '{:0=4}'.format(Pid) + "-" + Title + file_format[Lang] #存放的文件名
                         totalpath = os.path.join(newpath, filename) #把文件夹和文件组合成新的地址
 
-                        if os.path.exists(totalpath):
-                            print (newpath + "exists! Continue for the next submission!") #跳过本地已记录的submission
-                            continue
-
                         with open(totalpath, "w") as f: #开始写到本地
-                            # print ("Writing begins!", totalpath)
                             f.write(submission['code'])
                             print ("Writing ends!", totalpath)
-                            visited[Pid] = 1 #保障每道题只记录最新的AC解
+                            visited.add(Pid) #保障每道题只记录最新的AC解
                             
             except FileNotFoundError as e:
                 print("Output directory doesn't exist")
