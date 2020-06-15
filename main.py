@@ -73,7 +73,7 @@ def scraping(client):
         t = time.time()
         invalidset = set()
         html = json.loads(h.text)
-        if not html.get("submissions_dump") :
+        if not html.get("submissions_dump"):
             print ("Warning! No previous submission is detected, please make sure you are logging in the correct account AND you once submitted codes on leetcode-cn.com")
             break
             
@@ -126,6 +126,7 @@ def scraping(client):
                 
             except Exception as e:
                 print(e)
+                
         time.sleep(1)
         page_num += 20
 
