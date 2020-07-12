@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #/usr/bin/env python3
 """
 这是一个将力扣中国(leetcode-cn.com)上的【个人提交】的submission自动爬到本地并push到github上的爬虫脚本。
@@ -21,7 +22,9 @@ sign_in_url = leetcode_url + sign_in_url
 submissions_url = 'submissions/'
 submissions_url = leetcode_url + submissions_url
 
-with open("config.json", "r") as f: #读取用户名，密码，本地存储目录
+path = "/Users/wujiayang/Downloads/LeetCodeCN-Submissions-Crawler-master-2/config.json"
+
+with open(path, "r") as f: #读取用户名，密码，本地存储目录
     temp = json.loads(f.read())   
     USERNAME = temp['username']
     PASSWORD = temp['password']
@@ -46,7 +49,7 @@ def login(email, password): # 本函数修改自https://gist.github.com/fyears/4
                 'password': password
             }
             
-            result = client.post(sign_in_url, data=login_data, headers=dict(Referer=sign_in_url))
+            result = client.post(sign_in_url, data = login_data, headers = dict(Referer = sign_in_url))
             
             if result.ok:
                 print ("Login successfully!")
@@ -78,6 +81,7 @@ def scraping(client):
             break
             
         for idx, submission in enumerate((html["submissions_dump"])):
+            # print (submission)
             Status = submission['status_display']
             Title = submission['title'].replace(" ","")
             Lang = submission['lang']
@@ -103,8 +107,8 @@ def scraping(client):
 
                 else:
                     if Pid not in visited:
-
-                        if type(Pid) == type(0): # 如果题目是传统的数字题号
+                        if Pid[0].isdigit(): # 如果题目是传统的数字题号
+                            Pid = int(Pid)
                             newpath = OUTPUT_DIR + "/" + '{:0=4}'.format(Pid) + "." + Title #存放的文件夹名
                             filename = '{:0=4}'.format(Pid) + "-" + Title + file_format[Lang] #存放的文件名
                         else: # 如果题目是新的面试题
@@ -115,7 +119,7 @@ def scraping(client):
                             os.mkdir(newpath)
 
                         totalpath = os.path.join(newpath, filename) #把文件夹和文件组合成新的地址
-
+                        
                         with open(totalpath, "w") as f: #开始写到本地
                             f.write(submission['code'])
                             print ("Writing ends!", totalpath)
@@ -126,8 +130,8 @@ def scraping(client):
                 
             except Exception as e:
                 print(e)
-                
         time.sleep(1)
+            
         page_num += 20
 
 def git_push():
@@ -149,7 +153,7 @@ def main():
     scraping(client)
     print('end scrapping')
 
-    git_push()
+    # git_push()
     print('Git push finished')
 
 if __name__ == '__main__':
