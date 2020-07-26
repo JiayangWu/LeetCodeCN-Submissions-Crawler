@@ -3,6 +3,11 @@
 
 注意：是爬取【个人】也就是【你自己的账号】提交的代码，不是爬取【他人】的代码，更不是爬取【官方代码】！！！
 
+# 通知
+由于[issue](https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler/issues/17)描述的问题, 本项目暂时失效。
+欢迎有兴趣的朋友一起来修复。
+
+
 # 灵感
 **辛辛苦苦三个月，勤勤恳恳四百题，leetcode一片绿，github万里白。**
 
