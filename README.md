@@ -38,7 +38,7 @@
 1. 修复因LC-CN数据存储方式变更，导致的无法爬取代码的bug
 2. 更新`ProblemList`至题号1531，新的题号需要在`ProblemList`里手动添加
 
-当前版本V1.5，于2020/06/14上传
+历史版本V1.5，于2020/06/14上传
 1. 优化`main.py`，感谢[@zxMrlc](https://github.com/zxmrlc)
 2. 更新`ProblemList`至题号1473，新的题号需要在`ProblemList`里手动添加
 
