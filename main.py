@@ -67,9 +67,9 @@ def scraping(client):
     page_num = START_PAGE
     visited = set()
 
-    file_format = {"cpp": ".cpp", "Python3": ".py", "Python": ".py", "mysql": ".sql", "golang": ".go", "java": ".java",
-                   "c": ".c", "javascript": ".js", "php": ".php", "csharp": ".cs", "ruby": ".rb", "swift": ".swift",
-                   "scala": ".scl", "kotlin": ".kt", "rust": ".rs"}
+    file_format = {"C++": ".cpp", "Python3": ".py", "Python": ".py", "MySQL": ".sql", "Go": ".go", "Java": ".java",
+                   "C": ".c", "JavaScript": ".js", "PHP": ".php", "C#": ".cs", "Ruby": ".rb", "Swift": ".swift",
+                   "Scala": ".scl", "Kotlin": ".kt", "Rust": ".rs"}
     
     while True:
         print ("Now for page:", str(page_num))
@@ -174,7 +174,7 @@ def main():
     scraping(client)
     print('end scrapping')
 
-    git_push()
+    # git_push()
     print('Git push finished')
 
 if __name__ == '__main__':
