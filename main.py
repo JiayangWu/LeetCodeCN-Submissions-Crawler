@@ -4,6 +4,7 @@
 这是一个将力扣中国(leetcode-cn.com)上的【个人提交】的submission自动爬到本地并push到github上的爬虫脚本。
 请使用相同目录下的config.json设置 用户名，密码，本地储存目录等参数。
 致谢@fyears， 本脚本的login函数来自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
+致谢@Liuyang0001, 本脚本的get_submission_from_url函数来自https://github.com/Liuyang0001/Leetcode-Helper/blob/master/pkg/code_downloader.py
 """
 
 import unicodedata
@@ -12,6 +13,8 @@ from ProblemList import GetProblemId
 import requests, json
 from bs4 import BeautifulSoup
 import json
+import re
+from retry import retry
 #~~~~~~~~~~~~以下是无需修改的参数~~~~~~~~~~~~~~~~·
 requests.packages.urllib3.disable_warnings() #为了避免弹出一万个warning，which is caused by 非验证的get请求
 
@@ -64,7 +67,7 @@ def scraping(client):
     page_num = START_PAGE
     visited = set()
 
-    file_format = {"cpp": ".cpp", "python3": ".py", "python": ".py", "mysql": ".sql", "golang": ".go", "java": ".java",
+    file_format = {"cpp": ".cpp", "Python3": ".py", "Python": ".py", "mysql": ".sql", "golang": ".go", "java": ".java",
                    "c": ".c", "javascript": ".js", "php": ".php", "csharp": ".cs", "ruby": ".rb", "swift": ".swift",
                    "scala": ".scl", "kotlin": ".kt", "rust": ".rs"}
     
@@ -85,7 +88,6 @@ def scraping(client):
             Status = submission['status_display']
             Title = submission['title'].replace(" ","")
             Lang = submission['lang']
-
             
             if Status != "Accepted":
                 print (Title + " was not Accepted, continue for the next submission")
@@ -96,7 +98,7 @@ def scraping(client):
 
             try:
                 Pid = GetProblemId(Title)
-                
+
                 if Pid == "0" or Title in invalidset:
                     print (Title + " failed! Due to unknown Pid! ")
                     if Title not in invalidset: #第一次没找到
@@ -104,9 +106,9 @@ def scraping(client):
                             log.write("Unknown PID happened for " + Title)
 
                         invalidset.add(Title)
-
                 else:
                     if Pid not in visited:
+                        visited.add(Pid) #保障每道题只记录最新的AC解
                         if Pid[0].isdigit(): # 如果题目是传统的数字题号
                             Pid = int(Pid)
                             newpath = OUTPUT_DIR + "/" + '{:0=4}'.format(Pid) + "." + Title #存放的文件夹名
@@ -114,25 +116,44 @@ def scraping(client):
                         else: # 如果题目是新的面试题
                             newpath = OUTPUT_DIR + "/" + Pid + "." + Title
                             filename = Pid + "-" + Title + file_format[Lang] #存放的文件名
-
+                        
                         if not os.path.exists(newpath):
                             os.mkdir(newpath)
-
+                        
                         totalpath = os.path.join(newpath, filename) #把文件夹和文件组合成新的地址
                         
+                        code = get_submission_from_url(client, submission['url'])
+                        
                         with open(totalpath, "w") as f: #开始写到本地
-                            f.write(submission['code'])
+                            f.write(code)
                             print ("Writing ends!", totalpath)
-                            visited.add(Pid) #保障每道题只记录最新的AC解
                             
             except FileNotFoundError as e:
                 print("Output directory doesn't exist")
                 
             except Exception as e:
-                print(e)
+                print(e, " Unknwon bug happened, please raise issue with your log to the writer.")
         time.sleep(1)
             
         page_num += 20
+
+def get_submission_from_url(client, url): #本函数修改自 https://github.com/Liuyang0001/Leetcode-Helper/blob/master/pkg/code_downloader.py
+    url = "https://leetcode-cn.com" + url[:-1] # 必须去掉最后的/，不然提示CSRF错误
+    headers = {
+    'Connection': 'keep-alive',
+    'Content-Type': 'application/json',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'
+    }
+    code_content = client.post(url, headers=headers, timeout=10)
+    
+    pattern = re.compile(
+        r'submissionCode: \'(?P<code>.*)\',\n  editCodeUrl', re.S)
+    res = pattern.search(code_content.text)
+    code = res.groupdict()['code'] if res else None
+    code = re.sub(r'(\\u[\s\S]{4})', lambda x: x.group(
+        1).encode("utf-8").decode("unicode-escape"), code)
+    # print (code)
+    return code
 
 def git_push():
     today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
@@ -153,8 +174,9 @@ def main():
     scraping(client)
     print('end scrapping')
 
-    # git_push()
+    git_push()
     print('Git push finished')
 
 if __name__ == '__main__':
     main()
+
