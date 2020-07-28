@@ -3,11 +3,6 @@
 
 注意：是爬取【个人】也就是【你自己的账号】提交的代码，不是爬取【他人】的代码，更不是爬取【官方代码】！！！
 
-# 通知
-由于[issue](https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler/issues/17)描述的问题, 本项目暂时失效。
-欢迎有兴趣的朋友一起来修复。
-
-
 # 灵感
 **辛辛苦苦三个月，勤勤恳恳四百题，leetcode一片绿，github万里白。**
 
@@ -39,6 +34,10 @@
 4. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍
+当前版本V1.6，于2020/07/27上传
+1. 修复因LC-CN数据存储方式变更，导致的无法爬取代码的bug
+2. 更新`ProblemList`至题号1531，新的题号需要在`ProblemList`里手动添加
+
 当前版本V1.5，于2020/06/14上传
 1. 优化`main.py`，感谢[@zxMrlc](https://github.com/zxmrlc)
 2. 更新`ProblemList`至题号1473，新的题号需要在`ProblemList`里手动添加
