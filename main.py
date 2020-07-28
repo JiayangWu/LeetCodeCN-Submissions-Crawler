@@ -14,7 +14,7 @@ import requests, json
 from bs4 import BeautifulSoup
 import json
 import re
-from retry import retry
+
 #~~~~~~~~~~~~以下是无需修改的参数~~~~~~~~~~~~~~~~·
 requests.packages.urllib3.disable_warnings() #为了避免弹出一万个warning，which is caused by 非验证的get请求
 
