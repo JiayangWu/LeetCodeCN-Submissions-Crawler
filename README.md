@@ -1,4 +1,6 @@
 # LeetCodeCN-Submissions-Crawler
+[English introduction](https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler/blob/master/README-EN.md#leetcodecn-submissions-crawler)
+
 一句话简介：本项目是一个用来爬取力扣中国上**个人提交**的代码的爬虫。
 
 注意：是爬取【个人】也就是【你自己的账号】提交的代码，不是爬取【他人】的代码，更不是爬取【官方代码】！！！
