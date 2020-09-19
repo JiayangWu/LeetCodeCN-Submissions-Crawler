@@ -1,12 +1,15 @@
 # LeetCodeCN-Submissions-Crawler
 
-This project is a crawler used to crawl the code submitted by individuals in China.
+This project is a crawler used to crawl the code submitted to Leetcode-CN by programmers.
 
 # Inspiration
-**With three months of hard work, 
-I solved four hundred questions.
-A green leetcode dashboard,
-but no github contribution.**
+**With three months of hard work,** 
+
+**I solved four hundred questions.**
+
+**A green leetcode dashboard is nice,**
+
+**but my github is just white.**
 
 Manual uploading is impossible, and I would never do that in my whole life.
 
