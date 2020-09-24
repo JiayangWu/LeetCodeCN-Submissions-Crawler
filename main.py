@@ -106,8 +106,8 @@ def scraping(client):
 
                         invalidset.add(Title)
                 else:
-                    if Pid not in visited:
-                        visited.add(Pid) #保障每道题只记录最新的AC解
+                    if Lang+Pid not in visited:
+                        visited.add(Lang+Pid) #保障每道题只记录每种语言的最新的AC解
                         if Pid[0].isdigit(): # 如果题目是传统的数字题号
                             Pid = int(Pid)
                             newpath = OUTPUT_DIR + "/" + '{:0=4}'.format(Pid) + "." + Title #存放的文件夹名
