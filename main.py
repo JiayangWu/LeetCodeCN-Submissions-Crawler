@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #/usr/bin/env python3
 """
-这是一个将力扣中国(leetcode-cn.com)上的【个人提交】的submission自动爬到本地并push到github上的爬虫脚本。
+这是一个将力扣中国(leetcode.cn)上的【个人提交】的submission自动爬到本地并push到github上的爬虫脚本。
 请使用相同目录下的config.json设置 用户名，密码，本地储存目录等参数。
 致谢@fyears， 本脚本的login函数来自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
 原仓库地址：https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler
@@ -22,7 +22,7 @@ from ProblemList import GetProblemId
 #~~~~~~~~~~~~以下是无需修改的参数~~~~~~~~~~~~~~~~·
 requests.packages.urllib3.disable_warnings() #为了避免弹出一万个warning，which is caused by 非验证的get请求
 
-leetcode_url = 'https://leetcode-cn.com/'
+leetcode_url = 'https://leetcode.cn/'
 
 sign_in_url = leetcode_url + 'accounts/login/'
 submissions_url = leetcode_url + 'submissions/'
@@ -76,13 +76,13 @@ def scraping(client):
     
     while True:
         print ("Now for page:", str(page_num))
-        submissions_url = "https://leetcode-cn.com/api/submissions/?offset=" + str(page_num) + "&limit=20&lastkey="
+        submissions_url = "https://leetcode.cn/api/submissions/?offset=" + str(page_num) + "&limit=20&lastkey="
 
         html = client.get(submissions_url, verify=False)
         html = json.loads(html.text)
         cur_time = time.time()
         if not html.get("submissions_dump"):
-            print("Warning! No previous submission is detected, please make sure you are logging in the correct account AND you once submitted codes on leetcode-cn.com")
+            print("Warning! No previous submission is detected, please make sure you are logging in the correct account AND you once submitted codes on leetcode.cn")
             break
             
         for submission in html["submissions_dump"]:
@@ -139,7 +139,7 @@ def downloadCode(submission, client):
                     }
 
     param_json = json.dumps(param).encode("utf-8")
-    response = client.post("https://leetcode-cn.com/graphql/", data = param_json, headers = headers)
+    response = client.post("https://leetcode.cn/graphql/", data = param_json, headers = headers)
     submission_details = response.json()["data"]["submissionDetail"]
 
     return submission_details["code"]
