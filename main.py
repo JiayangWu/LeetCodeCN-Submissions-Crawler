@@ -32,6 +32,7 @@ with open(config_path, "r") as f:
     USERNAME = config['username']
     PASSWORD = config['password']
     OUTPUT_DIR = config['outputDir']
+    DAY = config['day']
     # 抓取的天数
     TIME_CONTROL = 3600 * 24 * config['day']
 
@@ -155,7 +156,7 @@ def scraping(client):
 
             # 时间记录
             if cur_time - submission['timestamp'] > TIME_CONTROL:
-                print("Finished scraping for the desired time.")
+                print("Finished scraping for Accepted submittions in past {} day(s).".format(DAY))
                 return
 
             if submission_status != "Accepted":
@@ -174,8 +175,9 @@ def scraping(client):
                         visited.add(token)
                         full_path = generatePath(problem_id, problem_title, submission_language)
 
-                        if (os.path.exists(full_path)):
-                            continue
+                        # TODO: 可以新加一个setting来决定是否覆盖同一题之前的题解
+                        # if (os.path.exists(full_path)):
+                        #     continue
 
                         code = downloadCode(submission, client)
                         with open(full_path, "w") as f:  # 开始写到本地
@@ -186,7 +188,7 @@ def scraping(client):
                 print("Output directory doesn't exist, please mannully create the ouput directory.")
 
             except Exception as e:
-                print(e, "An unknwon bug happened, please raise an issue with your log.")
+                print(e, "\n An unknwon bug happened, please raise an issue with your log.")
 
                 # 重新登录解决 NoneType 异常
                 if e.__str__()[:10] == "'NoneType'":
@@ -207,7 +209,7 @@ def gitPush():
     today = time.strftime('%Y-%m-%d', time.localtime(time.time()))
     os.chdir(OUTPUT_DIR)
     instructions = ["git add .", "git status",
-                    "git commit -m \"" + today + "\"", "git push -u origin master"]
+                    "git commit -m \"" + today + "\"", "git push"]
     for ins in instructions:
         os.system(ins)
         print("~~~~~~~~~~~~~" + ins + " finished! ~~~~~~~~")
@@ -221,11 +223,11 @@ def main():
 
     print('Start scrapping')
     scraping(client)
-    print('End scrapping')
+    print('End scrapping \n')
 
     # 调试中
     gitPush()
-    print('Git push finished')
+    # print('Git push finished')
 
 
 if __name__ == '__main__':
