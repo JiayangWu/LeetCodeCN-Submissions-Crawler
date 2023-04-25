@@ -6,7 +6,7 @@
 在 config.json 中设置：用户名、密码、代码存储目录、最大爬取天数。
 致谢 @fyears 的 login 函数来自 https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
 本代码原仓库地址: https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler
-爬虫失效，可在仓库中提出issue
+如爬虫失效，可在仓库中提出issue
 """
 
 import json
@@ -44,7 +44,7 @@ FILE_FORMAT = {"C++": ".cpp", "Python3": ".py", "Python": ".py", "MySQL": ".sql"
 START_PAGE = 0  # 从哪一页submission开始爬起，0是最新的一页
 SLEEP_TIME = 5  # 登录失败时的休眠时间/s
 PAGE_TIME = 3   # 翻页时间
-LIMIT = 20      # 一页出现提交记录数
+LIMIT = 20      # 一页提交记录数
 # -----------------------------
 
 # 登录函数，成功返回 访问会话
@@ -67,7 +67,6 @@ def login(username, password):
             result = client.post(sign_in_url, data=login_data,
                                  headers=dict(Referer=sign_in_url))
 
-            # result.ok 判断请求是否
             # result.url 判断是否真正登录成功
             if result.ok and result.url == 'https://leetcode.cn/':
                 print("Login successfully!")
@@ -77,7 +76,7 @@ def login(username, password):
             # 尝试三次后，结束登录
             print(e)
             if try_cnt >= 3:
-                print("Please sure your username and password is correct!!!")
+                print("Please ensure your LeetCodeCN username and password are correct!!!")
                 return None
             # 存在用户密码正确，而登录失败的情况因此多次登录解决(暂未解决)
             time.sleep(SLEEP_TIME)
@@ -161,22 +160,19 @@ def scraping(client):
 
             if submission_status != "Accepted":
                 print(problem_title +
-                      " was not Accepted, continue for the next submission")
+                      " was not Accepted, continue for the next submission.")
                 continue
 
             try:
                 problem_id = GetProblemId(problem_title)
                 if problem_id == "0":
-                    print(
-                        problem_title + " failed! Due to unknown Pid! Please check ProblemList.py to see if this question is included.")
                     not_found_list.append(problem_title)
                 else:
                     # 保障每道题只记录每种语言最新的AC解
                     token = problem_id + submission_language
                     if token not in visited:
                         visited.add(token)
-                        full_path = generatePath(
-                            problem_id, problem_title, submission_language)
+                        full_path = generatePath(problem_id, problem_title, submission_language)
 
                         if (os.path.exists(full_path)):
                             continue
@@ -187,11 +183,10 @@ def scraping(client):
                             print("Writing ends! ", full_path)
 
             except FileNotFoundError as e:
-                print("Output directory doesn't exist")
+                print("Output directory doesn't exist, please mannully create the ouput directory.")
 
             except Exception as e:
-                print(
-                    e, " Unknwon bug happened, please raise an issue with your log to the writer.")
+                print(e, "An unknwon bug happened, please raise an issue with your log.")
 
                 # 重新登录解决 NoneType 异常
                 if e.__str__()[:10] == "'NoneType'":
@@ -200,6 +195,12 @@ def scraping(client):
 
         page_num += LIMIT
         time.sleep(PAGE_TIME)
+
+        if not_found_list:
+            print("WARNING: writes for following problems failed due to unknown Problem id!")
+            print("Please check ProblemList.py to see if these questions are included.")
+            for problem_title in not_found_list:
+                print(problem_title)
 
 
 def gitPush():
@@ -223,8 +224,8 @@ def main():
     print('End scrapping')
 
     # 调试中
-    # gitPush()
-    # print('Git push finished')
+    gitPush()
+    print('Git push finished')
 
 
 if __name__ == '__main__':
