@@ -26,13 +26,15 @@ submissions_url = leetcode_url + 'submissions/'
 config_path = "./config.json"
 
 
-# 读取用户名，密码，本地存储目录，抓取天数
+
+# 读取用户名，密码，本地存储目录，抓取天数，是否覆盖之前的题解
 with open(config_path, "r") as f:
     config = json.loads(f.read())
     USERNAME = config['username']
     PASSWORD = config['password']
     OUTPUT_DIR = config['outputDir']
     DAY = config['day']
+    OVERWRITE = config['overwrite'] == "True"
     # 抓取的天数
     TIME_CONTROL = 3600 * 24 * config['day']
 
@@ -48,7 +50,6 @@ PAGE_TIME = 3   # 翻页时间
 LIMIT = 20      # 一页提交记录数
 # -----------------------------
 
-# 登录函数，成功返回 访问会话
 
 
 def login(username, password):
@@ -83,33 +84,26 @@ def login(username, password):
             time.sleep(SLEEP_TIME)
     return client
 
-# 生成文件路径
-
 
 def generatePath(problem_id, problem_title, submission_language):
-    # 如果题目是传统的数字题号
+    # 如果题目是传统的数字题号, 比如 0001.两数之和
     if problem_id[0].isdigit():
         problem_id = int(problem_id)
-        # 目录名
-        newpath = OUTPUT_DIR + "/" + \
+        pathname = OUTPUT_DIR + "/" + \
             '{:0=4}'.format(problem_id) + "." + problem_title
-        # 文件名
         filename = '{:0=4}'.format(problem_id) + "-" + \
             problem_title + FILE_FORMAT[submission_language]
     else:
-        # 如果题目是新的面试题
-        newpath = OUTPUT_DIR + "/" + problem_id + "." + problem_title
-        # 存放的文件名
+        # 如果题目是新的面试题, 比如 剑指 Offer 27-二叉树的镜像.py
+        pathname = OUTPUT_DIR + "/" + problem_id + "." + problem_title
         filename = problem_id + "-" + problem_title + \
             FILE_FORMAT[submission_language]
 
-    if not os.path.exists(newpath):
-        os.mkdir(newpath)
+    if not os.path.exists(pathname):
+        os.mkdir(pathname)
 
     # 完整路径
-    return os.path.join(newpath, filename)
-
-# 代码下载
+    return os.path.join(pathname, filename)
 
 
 def downloadCode(submission, client):
@@ -168,15 +162,14 @@ def scraping(client):
                 if problem_id == "0":
                     not_found_list.append(problem_title)
                 else:
-                    # 保障每道题只记录每种语言最新的AC解
+                    # 保障每道题只记录每种语言一个AC解
                     token = problem_id + submission_language
                     if token not in visited:
                         visited.add(token)
                         full_path = generatePath(problem_id, problem_title, submission_language)
 
-                        # TODO: 可以新加一个setting来决定是否覆盖同一题之前的题解
-                        # if (os.path.exists(full_path)):
-                        #     continue
+                        if not OVERWRITE and os.path.exists(full_path):
+                            continue
 
                         code = downloadCode(submission, client)
                         with open(full_path, "w") as f:  # 开始写到本地
@@ -230,22 +223,6 @@ def downloadCode(submission, client):
 
     return submission_details["code"]
 
-
-def generatePath(problem_id, problem_title, submission_language):
-    if problem_id[0].isdigit(): # 如果题目是传统的数字题号
-        problem_id = int(problem_id)
-        newpath = OUTPUT_DIR + "/" + '{:0=4}'.format(problem_id) + "." + problem_title #存放的文件夹名
-        filename = '{:0=4}'.format(problem_id) + "-" + problem_title + FILE_FORMAT[submission_language] #存放的文件名
-    else: # 如果题目是新的面试题
-        newpath = OUTPUT_DIR + "/" + problem_id + "." + problem_title
-        filename = problem_id + "-" + problem_title + FILE_FORMAT[submission_language] #存放的文件名
-    
-    if not os.path.exists(newpath):
-        os.mkdir(newpath)
-    
-    full_path = os.path.join(newpath, filename) #把文件夹和文件组合成新的地址
-    return full_path
-    
 
 def main():
     print('Login')
