@@ -41,7 +41,7 @@
 当前版本V2.0，于2023/05/05上传
 1. 更新`ProblemList`至题号2668，新的题号需要在`ProblemList`里手动添加
 2. 更新登录网址
-3. 优化获取`ProblemList`的方法。现在只需要在显示有全部题目的网页上通过网页审查元素复制`html`代码到`LeetCode.html`，然后运行`Python ProblemListGenerator.py`即可获取最近的所有题目和题号的对应。
+3. 优化获取`ProblemList`的方法。现在只需要在显示有全部题目的网页上通过网页审查元素复制`html`代码并存储到同一文件夹下的[LeetCode.html](https://github.com/JiayangWu/LeetCode-Crawler-Sample-HTML)，然后运行`Python ProblemListGenerator.py`即可获取最近的所有题目和题号的对应。
 
 当前版本V1.9，于2021/04/30上传
 1. 更新`ProblemList`至题号1841，新的题号需要在`ProblemList`里手动添加
