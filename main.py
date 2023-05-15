@@ -13,21 +13,24 @@ import json
 import os
 import time
 import requests
-from ProblemList import GetProblemId
-
+from get_problemset import get_problemset 
+# from ProblemList import GetProblemId
 
 # 避免验证 https 证书的报错
 requests.packages.urllib3.disable_warnings()
 
 
-leetcode_url = 'https://leetcode.cn/'
-sign_in_url = leetcode_url + 'accounts/login/'
-submissions_url = leetcode_url + 'submissions/'
-config_path = "./config.json"
-
+BASE_URL = 'https://leetcode.cn/'
+SIGNIN_URL = BASE_URL + 'accounts/login/'
+SUBMISSIONS_URL = BASE_URL + 'submissions/'
+CONFIG_PATH = "./config.json"
+MAPPING_PATH='./mapping.json'
+FILE_FORMAT = {"C++": ".cpp", "Python3": ".py", "Python": ".py", "MySQL": ".sql", "Go": ".go", "Java": ".java",
+               "C": ".c", "JavaScript": ".js", "TypeScript": ".ts", "PHP": ".php", "C#": ".cs", "Ruby": ".rb", "Swift": ".swift",
+               "Scala": ".scl", "Kotlin": ".kt", "Rust": ".rs"}
 
 # 读取用户名，密码，本地存储目录，抓取天数
-with open(config_path, "r") as f:
+with open(CONFIG_PATH, "r") as f:
     config = json.loads(f.read())
     USERNAME = config['username']
     PASSWORD = config['password']
@@ -35,21 +38,17 @@ with open(config_path, "r") as f:
     # 抓取的天数
     TIME_CONTROL = 3600 * 24 * config['day']
 
-FILE_FORMAT = {"C++": ".cpp", "Python3": ".py", "Python": ".py", "MySQL": ".sql", "Go": ".go", "Java": ".java",
-               "C": ".c", "JavaScript": ".js", "TypeScript": ".ts", "PHP": ".php", "C#": ".cs", "Ruby": ".rb", "Swift": ".swift",
-               "Scala": ".scl", "Kotlin": ".kt", "Rust": ".rs"}
-
+with open(MAPPING_PATH, 'r', encoding='utf-8') as f:
+    MAPPING=json.load(f)
 
 # -----------可选参数-----------
-START_PAGE = 0  # 从哪一页submission开始爬起，0是最新的一页
+START_PAGE = 0  # 从哪一页submission开始爬起，0 是最新的一页
 SLEEP_TIME = 5  # 登录失败时的休眠时间/s
 PAGE_TIME = 3   # 翻页时间
 LIMIT = 20      # 一页出现提交记录数
 # -----------------------------
 
 # 登录函数，成功返回 访问会话
-
-
 def login(username, password):
     client = requests.session()
     client.encoding = "utf-8"
@@ -58,60 +57,52 @@ def login(username, password):
     while True:
         try:
             try_cnt += 1
-            client.get(sign_in_url, verify=False)
+            client.get(SIGNIN_URL, verify=False)
             login_data = {
                 'login': username,
                 'password': password
             }
 
-            result = client.post(sign_in_url, data=login_data,
-                                 headers=dict(Referer=sign_in_url))
+            result = client.post(SIGNIN_URL, data=login_data,
+                                 headers=dict(Referer=SIGNIN_URL))
 
             # result.ok 判断请求是否
             # result.url 判断是否真正登录成功
             if result.ok and result.url == 'https://leetcode.cn/':
                 print("Login successfully!")
                 break
-            raise Exception("Login failed! Wait till next round!")
+            raise Exception("LoginError: Login failed, Wait till next round!")
         except Exception as e:
             # 尝试三次后，结束登录
             print(e)
             if try_cnt >= 3:
-                print("Please sure your username and password is correct!!!")
+                print("LoginError: Login failed, ensure your username and password is correct!")
                 return None
             # 存在用户密码正确，而登录失败的情况因此多次登录解决(暂未解决)
             time.sleep(SLEEP_TIME)
     return client
 
 # 生成文件路径
-
-
 def generatePath(problem_id, problem_title, submission_language):
     # 如果题目是传统的数字题号
     if problem_id[0].isdigit():
         problem_id = int(problem_id)
         # 目录名
-        newpath = OUTPUT_DIR + "/" + \
-            '{:0=4}'.format(problem_id) + "." + problem_title
+        newpath = OUTPUT_DIR +'{:0=4}'.format(problem_id) + "." + problem_title
         # 文件名
-        filename = '{:0=4}'.format(problem_id) + "-" + \
-            problem_title + FILE_FORMAT[submission_language]
+        filename = '{:0=4}'.format(problem_id) + "-" + problem_title + FILE_FORMAT[submission_language]
     else:
         # 如果题目是新的面试题
-        newpath = OUTPUT_DIR + "/" + problem_id + "." + problem_title
+        newpath = OUTPUT_DIR + problem_id + "." + problem_title
         # 存放的文件名
-        filename = problem_id + "-" + problem_title + \
-            FILE_FORMAT[submission_language]
+        filename = problem_id + "-" + problem_title +FILE_FORMAT[submission_language]
 
-    if not os.path.exists(newpath):
-        os.mkdir(newpath)
+    if not os.path.exists(newpath): os.mkdir(newpath)
 
     # 完整路径
     return os.path.join(newpath, filename)
 
 # 代码下载
-
-
 def downloadCode(submission, client):
     headers = {
         'Connection': 'keep-alive',
@@ -126,8 +117,7 @@ def downloadCode(submission, client):
     response = client.post("https://leetcode.cn/graphql/",
                            data=param_json, headers=headers)
     submission_details = response.json()["data"]["submissionDetail"]
-    if not submission_details:
-        return None
+    if not submission_details:return None
     return submission_details["code"]
 
 
@@ -136,7 +126,6 @@ def scraping(client):
     visited = set()
     not_found_list = []
 
-
     while True:
         print("\n", 'Now for page:{}'.format(page_num), "\n")
         submissions_url = "https://leetcode.cn/api/submissions/?offset={0}&limit={1}".format(page_num, LIMIT)
@@ -144,8 +133,7 @@ def scraping(client):
         html = json.loads(html.text)
 
         if not html.get("submissions_dump"):
-            print("---------------------interrupting---------------------")
-            print("No earlier submissions OR some errors have occurred!!!")
+            print("Notice: No earlier submissions or some errors have occurred!")
             break
 
         cur_time = time.time()
@@ -156,42 +144,38 @@ def scraping(client):
 
             # 时间记录
             if cur_time - submission['timestamp'] > TIME_CONTROL:
-                print("Finished scraping for the desired time.")
+                print("Notice: Finished scraping for the given time.")
                 return
 
             if submission_status != "Accepted":
-                print(problem_title +
-                      " was not Accepted, continue for the next submission")
+                # print(problem_title +
+                #       " was not Accepted, continue for the next submission")
                 continue
 
             try:
-                problem_id = GetProblemId(problem_title)
+                problem_id = MAPPING.get(problem_title, "0")
+
                 if problem_id == "0":
-                    print(
-                        problem_title + " failed! Due to unknown Pid! Please check ProblemList.py to see if this question is included.")
+                    print(f'Notice: {problem_title} failed, due to the unknown Pid and update MAPPING before scraping')
                     not_found_list.append(problem_title)
                 else:
                     # 保障每道题只记录每种语言最新的AC解
                     token = problem_id + submission_language
                     if token not in visited:
                         visited.add(token)
-                        full_path = generatePath(
-                            problem_id, problem_title, submission_language)
+                        full_path = generatePath(problem_id, problem_title, submission_language)
 
-                        if (os.path.exists(full_path)):
-                            continue
+                        if (os.path.exists(full_path)): continue
 
                         code = downloadCode(submission, client)
                         with open(full_path, "w") as f:  # 开始写到本地
                             f.write(code)
-                            print("Writing ends! ", full_path)
 
             except FileNotFoundError as e:
-                print("Output directory doesn't exist")
+                print("FileError: Output directory doesn't exist!")
 
             except Exception as e:
-                print(
-                    e, " Unknwon bug happened, please raise an issue with your log to the writer.")
+                print(f"{e}: Unknwon bug happened, please raise an issue with your log to the writer.")
 
                 # 重新登录解决 NoneType 异常
                 if e.__str__()[:10] == "'NoneType'":
@@ -213,6 +197,9 @@ def gitPush():
 
 
 def main():
+    
+    get_problemset()
+
     print('Login')
     client = login(USERNAME, PASSWORD)
     if not client:
