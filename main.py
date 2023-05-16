@@ -6,7 +6,7 @@
 在 config.json 中设置：用户名、密码、代码存储目录、最大爬取天数。
 致谢 @fyears 的 login 函数来自 https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
 本代码原仓库地址: https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler
-爬虫失效，可在仓库中提出issue
+如爬虫失效，可在仓库中提出issue
 """
 
 import json
@@ -14,41 +14,48 @@ import os
 import time
 import requests
 from get_problemset import get_problemset 
-# from ProblemList import GetProblemId
 
-# 避免验证 https 证书的报错
-requests.packages.urllib3.disable_warnings()
+# 初始化参数
+def init():
+    # 避免验证 https 证书的报错
+    requests.packages.urllib3.disable_warnings()
+    global BASE_URL, SIGNIN_URL, SUBMISSIONS_URL, FILE_FORMAT, MAPPING, USERNAME, PASSWORD, \
+            OUTPUT_DIR, TIME_CONTROL, START_PAGE, SLEEP_TIME, PAGE_TIME, LIMIT
 
+    BASE_URL = 'https://leetcode.cn/'
+    SIGNIN_URL = BASE_URL + 'accounts/login/'
+    SUBMISSIONS_URL = BASE_URL + 'api/submissions/'
+    CONFIG_PATH = "./config.json"
+    MAPPING_PATH='./mapping.json'
+    FILE_FORMAT = {"C++": ".cpp", "Python3": ".py", "Python": ".py", "MySQL": ".sql", "Go": ".go", "Java": ".java",
+                "C": ".c", "JavaScript": ".js", "TypeScript": ".ts", "PHP": ".php", "C#": ".cs", "Ruby": ".rb", "Swift": ".swift",
+                "Scala": ".scl", "Kotlin": ".kt", "Rust": ".rs"}
 
-BASE_URL = 'https://leetcode.cn/'
-SIGNIN_URL = BASE_URL + 'accounts/login/'
-SUBMISSIONS_URL = BASE_URL + 'submissions/'
-CONFIG_PATH = "./config.json"
-MAPPING_PATH='./mapping.json'
-FILE_FORMAT = {"C++": ".cpp", "Python3": ".py", "Python": ".py", "MySQL": ".sql", "Go": ".go", "Java": ".java",
-               "C": ".c", "JavaScript": ".js", "TypeScript": ".ts", "PHP": ".php", "C#": ".cs", "Ruby": ".rb", "Swift": ".swift",
-               "Scala": ".scl", "Kotlin": ".kt", "Rust": ".rs"}
+    # 读取用户名，密码，本地存储目录，抓取天数
+    with open(CONFIG_PATH, "r") as f:
+        config = json.loads(f.read())
+        USERNAME = config['username']
+        PASSWORD = config['password']
+        OUTPUT_DIR = config['output_dir']
+        # 抓取的天数
+        TIME_CONTROL = 3600 * 24 * config['day']
 
-# 读取用户名，密码，本地存储目录，抓取天数
-with open(CONFIG_PATH, "r") as f:
-    config = json.loads(f.read())
-    USERNAME = config['username']
-    PASSWORD = config['password']
-    OUTPUT_DIR = config['outputDir']
-    # 抓取的天数
-    TIME_CONTROL = 3600 * 24 * config['day']
+    if not os.path.exists(OUTPUT_DIR): os.mkdir(OUTPUT_DIR)
 
-with open(MAPPING_PATH, 'r', encoding='utf-8') as f:
-    MAPPING=json.load(f)
+    with open(MAPPING_PATH, 'r', encoding='utf-8') as f:
+        MAPPING=json.load(f)
 
-# -----------可选参数-----------
-START_PAGE = 0  # 从哪一页submission开始爬起，0 是最新的一页
-SLEEP_TIME = 5  # 登录失败时的休眠时间/s
-PAGE_TIME = 3   # 翻页时间
-LIMIT = 20      # 一页出现提交记录数
-# -----------------------------
+    # -----------可选参数-----------
+    # 从哪一页submission开始爬起，0 是最新的一页
+    START_PAGE = 0
+    # 登录失败时的休眠时间/s
+    SLEEP_TIME = 5
+    # 翻页时间
+    PAGE_TIME = 3
+    # 一页提交记录数
+    LIMIT = 20
 
-# 登录函数，成功返回 访问会话
+# 登录函数
 def login(username, password):
     client = requests.session()
     client.encoding = "utf-8"
@@ -66,9 +73,8 @@ def login(username, password):
             result = client.post(SIGNIN_URL, data=login_data,
                                  headers=dict(Referer=SIGNIN_URL))
 
-            # result.ok 判断请求是否
             # result.url 判断是否真正登录成功
-            if result.ok and result.url == 'https://leetcode.cn/':
+            if result.ok and result.url == BASE_URL:
                 print("Login successfully!")
                 break
             raise Exception("LoginError: Login failed, Wait till next round!")
@@ -117,18 +123,18 @@ def downloadCode(submission, client):
     response = client.post("https://leetcode.cn/graphql/",
                            data=param_json, headers=headers)
     submission_details = response.json()["data"]["submissionDetail"]
-    if not submission_details:return None
-    return submission_details["code"]
+    return submission_details["code"] if submission_details else None
 
-
+# 爬取函数
 def scraping(client):
     page_num = START_PAGE
     visited = set()
     not_found_list = []
 
     while True:
-        print("\n", 'Now for page:{}'.format(page_num), "\n")
-        submissions_url = "https://leetcode.cn/api/submissions/?offset={0}&limit={1}".format(page_num, LIMIT)
+        print(f'\nNow for page:{page_num}\n')
+        submissions_url = f"{SUBMISSIONS_URL}?offset={page_num}&limit={LIMIT}"
+        print(submissions_url)
         html = client.get(submissions_url, verify=True)
         html = json.loads(html.text)
 
@@ -144,19 +150,16 @@ def scraping(client):
 
             # 时间记录
             if cur_time - submission['timestamp'] > TIME_CONTROL:
-                print("Notice: Finished scraping for the given time.")
+                print("Notice: Finished scraping for the preset time.")
                 return
 
-            if submission_status != "Accepted":
-                # print(problem_title +
-                #       " was not Accepted, continue for the next submission")
-                continue
+            if submission_status != "Accepted": continue
 
             try:
                 problem_id = MAPPING.get(problem_title, "0")
 
                 if problem_id == "0":
-                    print(f'Notice: {problem_title} failed, due to the unknown Pid and update MAPPING before scraping')
+                    print(f"ScrapError: {problem_title} failed, due to unkown Pid!")
                     not_found_list.append(problem_title)
                 else:
                     # 保障每道题只记录每种语言最新的AC解
@@ -172,7 +175,7 @@ def scraping(client):
                             f.write(code)
 
             except FileNotFoundError as e:
-                print("FileError: Output directory doesn't exist!")
+                print("FileNotFoundError: Output directory doesn't exist!")
 
             except Exception as e:
                 print(f"{e}: Unknwon bug happened, please raise an issue with your log to the writer.")
@@ -185,31 +188,35 @@ def scraping(client):
         page_num += LIMIT
         time.sleep(PAGE_TIME)
 
+        if not_found_list:
+            print("Warning: Writes for following problems failed due to unknown Problem id!")
+            for problem_title in not_found_list:
+                print(problem_title)
+
 
 def gitPush():
     today = time.strftime('%Y-%m-%d', time.localtime(time.time()))
     os.chdir(OUTPUT_DIR)
     instructions = ["git add .", "git status",
-                    "git commit -m \"" + today + "\"", "git push -u origin master"]
+                    "git commit -m \"" + today + "\"", "git push"]
     for ins in instructions:
         os.system(ins)
         print("~~~~~~~~~~~~~" + ins + " finished! ~~~~~~~~")
 
 
-def main():
-    
-    get_problemset()
+def main(update_problemset=True):
+    init()
+
+    if(update_problemset): get_problemset()
 
     print('Login')
     client = login(USERNAME, PASSWORD)
-    if not client:
-        return
+    if not client: return
 
     print('Start scrapping')
     scraping(client)
-    print('End scrapping')
+    print('End scrapping \n')
 
-    # 调试中
     # gitPush()
     # print('Git push finished')
 

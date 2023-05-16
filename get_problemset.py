@@ -1,5 +1,5 @@
-import requests
 import json
+import requests
 
 def get_problemset():
     url = 'https://leetcode.cn/graphql/'
@@ -36,7 +36,7 @@ def get_problemset():
 
     with open('./mapping.json', 'w', encoding='utf-8') as f:
         json.dump(mapping, f, ensure_ascii=False)
-    print('请求题集终止')
+    print('更新题集完成')
 
 if __name__=='__main__':
     get_problemset()

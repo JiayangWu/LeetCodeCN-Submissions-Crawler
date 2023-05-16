@@ -1,6 +1,6 @@
 {
   "username": "xxxx",
   "password": "yyyy",
-  "outputDir": "D:\\workspace\\LeetCodeCN-Submissions-Crawler\\problems_list\\",
+  "output_dir": "D:\\workspace\\LeetCodeCN-Submissions-Crawler\\problems_list\\",
   "day": 1000
 }
