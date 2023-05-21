@@ -1,7 +1,7 @@
 {
-  "username": "xxxxx",
-  "password": "yyyyy",
-  "outputDir": "D:\\workspace\\LeetCodeCN-Submissions-Crawler\\problems_list",
+  "username": "xxxx",
+  "password": "yyyy",
+  "output_dir": "D:\\workspace\\LeetCodeCN-Submissions-Crawler\\problems_list\\",
   "day": 1000,
-  "overwrite": "False",
+  "overwrite": "False"
 }
