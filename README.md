@@ -34,7 +34,7 @@
                    "scala": ".scl", "kotlin": ".kt", "rust": ".rs"}`
 2. 致谢@fyears， 本脚本的`login`函数来自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
 3. `config.json`里的`day`代表爬多少天之内的`submission`，比如我每天爬今天提交的题解，就是设置为`0.8`就好了，如果第一次使用需要爬所有的题解，就设一个大一点的数比如`1000`之类的。
-4. `config.json`里的`overwrite`代表是否覆盖之前的题解。如果是`True`就代表如果你`AC`了一道题两次，第二次的题解会覆盖第一次的题解。
+4. `config.json`里的`overwrite`代表是否覆盖之前的题解。如果是`True`就代表如果你隔一段时间`AC`了一道题两次，第二次的题解会覆盖第一次的题解。但是你第一次的题解依然可以在`commit`里找到记录。
 5. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍

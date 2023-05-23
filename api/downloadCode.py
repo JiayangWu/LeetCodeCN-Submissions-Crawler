@@ -1,6 +1,6 @@
 import json
 
-# 代码下载
+
 def downloadCode(submission, client):
     headers = {
         'Connection': 'keep-alive',
@@ -13,6 +13,6 @@ def downloadCode(submission, client):
 
     param_json = json.dumps(param).encode("utf-8")
     response = client.post("https://leetcode.cn/graphql/",
-                           data = param_json, headers = headers)
+                           data=param_json, headers=headers)
     submission_details = response.json()["data"]["submissionDetail"]
     return submission_details["code"] if submission_details else None
