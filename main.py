@@ -27,10 +27,10 @@ def init():
     # 避免验证 https 证书的报错
     requests.packages.urllib3.disable_warnings()
     global MAPPING, USERNAME, PASSWORD,OUTPUT_DIR, \
-            TIME_CONTROL, START_PAGE, SLEEP_TIME, PAGE_TIME, LIMIT
+           TIME_CONTROL, START_PAGE, SLEEP_TIME, PAGE_TIME, LIMIT
 
     CONFIG_PATH = "./config.json"
-    MAPPING_PATH='./mapping.json'
+    MAPPING_PATH = "./mapping.json"
 
     # 读取用户名，密码，本地存储目录，抓取天数
     with open(CONFIG_PATH, "r") as f:
@@ -41,10 +41,11 @@ def init():
         # 抓取的天数
         TIME_CONTROL = 3600 * 24 * config['day']
 
-    if not os.path.exists(OUTPUT_DIR): os.mkdir(OUTPUT_DIR)
+    if not os.path.exists(OUTPUT_DIR): 
+        os.mkdir(OUTPUT_DIR)
 
     with open(MAPPING_PATH, 'r', encoding='utf-8') as f:
-        MAPPING=json.load(f)
+        MAPPING = json.load(f)
 
     # -----------可选参数-----------
     # 从哪一页submission开始爬起，0 是最新的一页
@@ -63,7 +64,7 @@ def scraping(client):
     not_found_list = []
 
     while True:
-        print(f'\nNow for page:{page_num}\n')
+        print(f'\nNow scraping for page:{page_num}\n')
         submissions_url = "https://leetcode.cn/api/submissions/?offset={0}&limit={1}".format(page_num, LIMIT)
         html = client.get(submissions_url, verify=True)
         html = json.loads(html.text)
@@ -99,7 +100,7 @@ def scraping(client):
                         full_path = generatePath(problem_id, problem_title, submission_language, OUTPUT_DIR)
 
                         # overwrite 为 True 时，会记录最早AC的代码，不符合直觉
-                        if os.path.exists(full_path):
+                        if not OVERWRITE and os.path.exists(full_path):
                             continue
 
                         code = downloadCode(submission, client)
@@ -115,7 +116,7 @@ def scraping(client):
                 # 重新登录解决 NoneType 异常
                 if e.__str__()[:10] == "'NoneType'":
                     client = login(USERNAME, PASSWORD)
-                time.sleep(PAGE_TIME*2)
+                time.sleep(PAGE_TIME * 2)
 
         page_num += LIMIT
         time.sleep(PAGE_TIME)
@@ -127,7 +128,8 @@ def scraping(client):
 
 
 def main(update_problemset=True):
-    if(update_problemset): getProblemSet()
+    if (update_problemset): 
+        getProblemSet()
 
     # 当 mapping.json 文件不存在时， init 会报错
     init()
@@ -140,8 +142,8 @@ def main(update_problemset=True):
     scraping(client)
     print('End scrapping \n')
 
-    # gitPush(OUTPUT_DIR)
-    # print('Git push finished')
+    gitPush(OUTPUT_DIR)
+    print('Git push finished')
 
 
 if __name__ == '__main__':

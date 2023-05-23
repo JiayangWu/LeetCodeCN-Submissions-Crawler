@@ -20,7 +20,8 @@ def generatePath(problem_id, problem_title, submission_language, OUTPUT_DIR):
         # 存放的文件名
         filename = problem_id + "-" + problem_title +FILE_FORMAT[submission_language]
 
-    if not os.path.exists(newpath): os.mkdir(newpath)
+    if not os.path.exists(newpath): 
+        os.mkdir(newpath)
 
     # 完整路径
     return os.path.join(newpath, filename)
@@ -30,6 +31,6 @@ def gitPush(OUTPUT_DIR):
     os.chdir(OUTPUT_DIR)
     instructions = ["git add .", "git status",
                     "git commit -m \"" + today + "\"", "git push"]
-    for ins in instructions:
-        os.system(ins)
-        print("~~~~~~~~~~~~~" + ins + " finished! ~~~~~~~~")
+    for instruction in instructions:
+        os.system(instruction)
+        print("~~~~~~~~~~~~~" + instruction + " finished! ~~~~~~~~")

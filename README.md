@@ -38,7 +38,12 @@
 5. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍
-当前版本V2.1，于2021/04/30上传
+当前版本V2.2，于2023/05/22上传
+1. 实现了自动更新题号，以后可以直接从官网下载题号和题目标题，并存储在`mapping.json`里
+2. 代码重构
+3. 感谢[frallisland](https://github.com/frallisland)
+
+当前版本V2.1，于2023/05/13上传
 1. 更新`ProblemList`至题号2688，新的题号需要在`ProblemList`里手动添加
 
 历史版本V2.0，于2023/05/05上传
