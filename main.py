@@ -132,7 +132,7 @@ def scraping(client):
 
 
 def main(update_problemset=True):
-    if (update_problemset):
+    if update_problemset:
         getProblemSet()
 
     if not os.path.exists("mapping.json"):
