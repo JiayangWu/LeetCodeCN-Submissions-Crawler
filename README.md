@@ -34,11 +34,16 @@
                    "scala": ".scl", "kotlin": ".kt", "rust": ".rs"}`
 2. 致谢@fyears， 本脚本的`login`函数来自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
 3. `config.json`里的`day`代表爬多少天之内的`submission`，比如我每天爬今天提交的题解，就是设置为`0.8`就好了，如果第一次使用需要爬所有的题解，就设一个大一点的数比如`1000`之类的。
-4. `config.json`里的`overwrite`代表是否覆盖之前的题解。如果是`True`就代表如果你`AC`了一道题两次，第二次的题解会覆盖第一次的题解。
+4. `config.json`里的`overwrite`代表是否覆盖之前的题解。如果是`True`就代表如果你隔一段时间`AC`了一道题两次，第二次的题解会覆盖第一次的题解。但是你第一次的题解依然可以在`commit`里找到记录。
 5. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍
-当前版本V2.1，于2021/04/30上传
+当前版本V2.2，于2023/05/22上传
+1. 实现了自动更新题号，以后可以直接从官网下载题号和题目标题，并存储在`mapping.json`里
+2. 代码重构
+3. 感谢[frallisland](https://github.com/frallisland)
+
+当前版本V2.1，于2023/05/13上传
 1. 更新`ProblemList`至题号2688，新的题号需要在`ProblemList`里手动添加
 
 历史版本V2.0，于2023/05/05上传
