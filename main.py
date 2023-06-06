@@ -58,7 +58,7 @@ def init():
     LIMIT = 20
 
 
-def scraping(client, update_problemset):
+def scraping(client):
     page_num = START_PAGE
     visited = set()
     not_found_list = []
@@ -85,7 +85,7 @@ def scraping(client, update_problemset):
             if cur_time - submission['timestamp'] > TIME_CONTROL:
                 print("Notice: Finished scraping for the preset time.")
                 wrap_up_scraping(
-                    not_found_list, problems_to_be_reprocessed, update_problemset, MAPPING)
+                    not_found_list, problems_to_be_reprocessed, MAPPING)
                 return
 
             if submission_status != "Accepted":
@@ -153,7 +153,7 @@ def main(update_problemset=True):
         return
 
     print('Start scrapping')
-    scraping(client, update_problemset)
+    scraping(client)
     print('End scrapping \n')
 
     gitPush(OUTPUT_DIR)
