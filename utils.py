@@ -39,7 +39,7 @@ def gitPush(OUTPUT_DIR):
         print("~~~~~~~~~~~~~" + instruction + " finished! ~~~~~~~~")
 
 
-def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, update_problemset, MAPPING):
+def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
     if not_found_list:
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("Warning: Writes for following problems failed due to unknown Problem id!")
@@ -48,7 +48,6 @@ def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, update_problems
             print(problem_title)
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 
-    # 处理暂时题号
     # 二次处理新题目，以永久题号替代暂时题号
     with open(TEMP_FILE_PATH, "r") as f:
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -67,16 +66,18 @@ def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, update_problems
 
             old_dir_path, old_file_name = os.path.split(old_path)
             new_dir_path, new_file_name = os.path.split(new_path)
-            # 确保新文件所在的文件夹存在
+
             if os.path.exists(new_path):
                 # if new path exists, just delete old path
                 print(f"{new_file_name} exists, {old_file_name} will be deleted")
                 os.remove(old_path)
                 os.rmdir(old_dir_path)
                 continue
+                
             os.makedirs(new_dir_path, exist_ok=True)
             os.rename(old_dir_path, new_dir_path)
             os.rename(os.path.join(new_dir_path, old_file_name), new_path)
+            
             print(f"{old_file_name} has been renamed to {new_file_name}")
 
     os.remove(TEMP_FILE_PATH)
