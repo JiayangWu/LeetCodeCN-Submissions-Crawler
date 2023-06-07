@@ -49,36 +49,38 @@ def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 
     # 二次处理新题目，以永久题号替代暂时题号
-    with open(TEMP_FILE_PATH, "r") as f:
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("Now deal with problems with temporary problem IDs.")
-        print("Renaming or deleting would be needed.")
-        for line in f.readlines():
-            title, old_path = line.rstrip().split(" ", 1)
-            old_problem_id, problem_title = title.split("-", 1)
+    if os.path.exists(TEMP_FILE_PATH):
+        with open(TEMP_FILE_PATH, "r") as f:
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print("Now deal with problems with temporary problem IDs.")
+            print("Renaming or deleting would be needed.")
+            for line in f.readlines():
+                title, old_path = line.rstrip().split(" ", 1)
+                old_problem_id, problem_title = title.split("-", 1)
 
-            permanent_problem_id = MAPPING.get(problem_title, 0)
-            new_problem_id = '{:0>4}'.format(permanent_problem_id)
-            if not permanent_problem_id:
-                problems_to_be_reprocessed.append((title, old_path))
-            else:
-                new_path = old_path.replace(old_problem_id, new_problem_id)
+                permanent_problem_id = MAPPING.get(problem_title, 0)
+                new_problem_id = '{:0>4}'.format(permanent_problem_id)
+                if not permanent_problem_id:
+                    problems_to_be_reprocessed.append((title, old_path))
+                else:
+                    new_path = old_path.replace(old_problem_id, new_problem_id)
 
-            old_dir_path, old_file_name = os.path.split(old_path)
-            new_dir_path, new_file_name = os.path.split(new_path)
+                old_dir_path, old_file_name = os.path.split(old_path)
+                new_dir_path, new_file_name = os.path.split(new_path)
 
-            if os.path.exists(new_path):
-                # if new path exists, just delete old path
-                print(f"{new_file_name} exists, {old_file_name} will be deleted")
-                os.remove(old_path)
-                os.rmdir(old_dir_path)
-                continue
-                
-            os.makedirs(new_dir_path, exist_ok=True)
-            os.rename(old_dir_path, new_dir_path)
-            os.rename(os.path.join(new_dir_path, old_file_name), new_path)
-            
-            print(f"{old_file_name} has been renamed to {new_file_name}")
+                if os.path.exists(new_path):
+                    # if new path exists, just delete old path
+                    print(
+                        f"{new_file_name} exists, {old_file_name} will be deleted")
+                    os.remove(old_path)
+                    os.rmdir(old_dir_path)
+                    continue
+
+                os.makedirs(new_dir_path, exist_ok=True)
+                os.rename(old_dir_path, new_dir_path)
+                os.rename(os.path.join(new_dir_path, old_file_name), new_path)
+
+                print(f"{old_file_name} has been renamed to {new_file_name}")
 
     os.remove(TEMP_FILE_PATH)
 
