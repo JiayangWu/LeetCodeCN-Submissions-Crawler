@@ -82,8 +82,8 @@ def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
 
                 print(f"{old_file_name} has been renamed to {new_file_name}")
 
-    os.remove(TEMP_FILE_PATH)
-
+        os.remove(TEMP_FILE_PATH)
+        
     # 把暂时题号的题目写到本地
     if problems_to_be_reprocessed:
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
