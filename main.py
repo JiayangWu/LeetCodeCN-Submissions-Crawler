@@ -17,7 +17,7 @@ from api.login import login
 from api.downloadCode import downloadCode
 from api.getProblemSet import getProblemSet
 
-from utils import generatePath, gitPush
+from utils import generatePath, gitPush, wrap_up_scraping
 
 # 避免验证 https 证书的报错
 requests.packages.urllib3.disable_warnings()
@@ -62,6 +62,7 @@ def scraping(client):
     page_num = START_PAGE
     visited = set()
     not_found_list = []
+    problems_to_be_reprocessed = []
 
     while True:
         print(f'\nNow scraping for page:{page_num}\n')
@@ -83,6 +84,8 @@ def scraping(client):
             # 时间记录
             if cur_time - submission['timestamp'] > TIME_CONTROL:
                 print("Notice: Finished scraping for the preset time.")
+                wrap_up_scraping(
+                    not_found_list, problems_to_be_reprocessed, MAPPING)
                 return
 
             if submission_status != "Accepted":
@@ -110,6 +113,14 @@ def scraping(client):
                             f.write(code)
                             print("Writing ends! ", full_path)
 
+                        if problem_id[0].isdigit():
+                            filename = '{:0>4}'.format(
+                                problem_id) + "-" + problem_title
+                            # 最新题的暂时题号以6开始, 会在一周以内变成永久题号，所以需要多次处理
+                            if filename[0] >= "6":
+                                problems_to_be_reprocessed.append(
+                                    (filename, full_path))
+
             except FileNotFoundError as e:
                 print("FileNotFoundError: Output directory doesn't exist!")
 
@@ -124,11 +135,6 @@ def scraping(client):
 
         page_num += LIMIT
         time.sleep(PAGE_TIME)
-
-    if not_found_list:
-        print("Warning: Writes for following problems failed due to unknown Problem id!")
-        for problem_title in not_found_list:
-            print(problem_title)
 
 
 def main(update_problemset=True):
