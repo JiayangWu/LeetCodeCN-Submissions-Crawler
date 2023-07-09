@@ -1,7 +1,7 @@
 import os
 import time
 
-from logger import logger
+from src.logger import logger
 
 FILE_FORMAT = {"C++": ".cpp", "Python3": ".py", "Python": ".py", "MySQL": ".sql", "Go": ".go", "Java": ".java",
                "C": ".c", "JavaScript": ".js", "TypeScript": ".ts", "PHP": ".php", "C#": ".cs", "Ruby": ".rb", "Swift": ".swift",
@@ -35,9 +35,12 @@ def gitPush(OUTPUT_DIR):
     os.chdir(OUTPUT_DIR)
     instructions = ["git add .", "git status",
                     "git commit -m \"" + today + "\"", "git push"]
-    for instruction in instructions:
-        os.system(instruction)
-        logger.info("~~~~~~~~~~~~~" + instruction + " finished! ~~~~~~~~")
+    try:
+        for instruction in instructions:
+            os.system(instruction)
+            logger.info("~~~~~~~~~~~~~" + instruction + " finished! ~~~~~~~~")
+    except Exception:
+        logger.warning("Git operations failed, please install git, skip it for now.")
 
 
 def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
