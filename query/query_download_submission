@@ -1,0 +1,5 @@
+query mySubmissionDetail($id: ID!) {
+    submissionDetail(submissionId: $id) {
+        code
+    }
+}
