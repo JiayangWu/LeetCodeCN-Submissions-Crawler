@@ -1,8 +1,7 @@
 import time
 import requests
 
-
-def login(username, password, SLEEP_TIME=5, BASE_URL='https://leetcode.cn/', SIGNIN_URL='https://leetcode.cn/accounts/login/',):
+def login(username, password, SLEEP_TIME=5, BASE_URL='https://leetcode.cn/', SIGNIN_URL='https://leetcode.cn/accounts/login/',logger=None):
     client = requests.session()
     client.encoding = "utf-8"
 
@@ -21,15 +20,16 @@ def login(username, password, SLEEP_TIME=5, BASE_URL='https://leetcode.cn/', SIG
 
             # result.url 判断是否真正登录成功
             if result.ok and result.url == BASE_URL:
-                print("Login successfully!")
+                logger.info("Login successfully!")
                 break
             raise Exception("LoginError: Login failed, Wait till next round!")
         except Exception as e:
             # 尝试三次后，结束登录
-            print(e)
+            logger.error(e)
             if try_cnt >= 3:
-                print(
-                    "LoginError: Login failed, ensure your username and password is correct!")
+                logger.error(
+                    "LoginError: Login failed, ensure your username and password is correct!"
+                )
                 return None
             # 存在用户密码正确，而登录失败的情况因此多次登录解决(暂未解决)
             time.sleep(SLEEP_TIME)

@@ -5,15 +5,14 @@ import os
 import requests
 
 
-def getProblemSet(file_path='mapping.json'):
-    print('Starting updating problemset, which might take 2 mins')
+def getProblemSet(file_path='mapping.json', logger=None):
+    logger.info('Starting updating problemset, which might take 2 mins')
     url = 'https://leetcode.cn/graphql/'
     # 定义请求头
     headers = {
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Connection': 'keep-alive',
         'Content-Type': 'application/json',
-        'Accept-Charset': 'utf-8',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'
     }
 
     s = requests.Session()
@@ -45,4 +44,4 @@ def getProblemSet(file_path='mapping.json'):
 
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(mapping, f, ensure_ascii=False)
-    print('Completed updating problemset \n')
+    logger.info('Completed updating problemset \n')
