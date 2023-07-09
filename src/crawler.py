@@ -8,16 +8,12 @@ from src.utils import generatePath, gitPush, wrap_up_scraping
 
 from src.logger import logger
 
-# 避免验证 https 证书的报错
-requests.packages.urllib3.disable_warnings()
-
 
 class Crawler:
     CONFIG_PATH = "./configuration/config.json"
     MAPPING_PATH = "./configuration/mapping.json"
 
     def __init__(self, args) -> None:
-        requests.packages.urllib3.disable_warnings()
         with open(self.CONFIG_PATH, "r") as f:
             config = json.loads(f.read())
             self.USERNAME = args.id if args.id else config['username']
