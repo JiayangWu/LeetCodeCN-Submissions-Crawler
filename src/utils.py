@@ -3,9 +3,23 @@ import time
 
 from src.logger import logger
 
-FILE_FORMAT = {"C++": ".cpp", "Python3": ".py", "Python": ".py", "MySQL": ".sql", "Go": ".go", "Java": ".java",
-               "C": ".c", "JavaScript": ".js", "TypeScript": ".ts", "PHP": ".php", "C#": ".cs", "Ruby": ".rb", "Swift": ".swift",
-               "Scala": ".scl", "Kotlin": ".kt", "Rust": ".rs"}
+FILE_FORMAT = {
+    "C++": ".cpp",
+    "Python3": ".py",
+    "Python": ".py",
+    "MySQL": ".sql",
+    "Go": ".go",
+    "Java": ".java",
+    "C": ".c",
+    "JavaScript": ".js",
+    "TypeScript": ".ts",
+    "PHP": ".php",
+    "C#": ".cs",
+    "Ruby": ".rb",
+    "Swift": ".swift",
+    "Scala": ".scl",
+    "Kotlin": ".kt",
+    "Rust": ".rs"}
 
 TEMP_FILE_PATH = "./temp_problemset.txt"
 
@@ -40,22 +54,26 @@ def gitPush(OUTPUT_DIR):
             os.system(instruction)
             logger.info("~~~~~~~~~~~~~" + instruction + " finished! ~~~~~~~~")
     except Exception:
-        logger.warning("Git operations failed, please install git, skip it for now.")
+        logger.warning(
+            "Git operations failed, please install git, skip it for now.")
 
 
 def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
     if not_found_list:
         logger.warning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        logger.warning("Warning: Writes for following problems failed due to unknown Problem id!")
+        logger.warning(
+            "Warning: Writes for following problems failed due to unknown Problem id!")
         logger.warning("This issue can be solved by updating problemset")
         for problem_title in not_found_list:
             logger.warning(problem_title)
-        logger.warning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+        logger.warning(
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 
     # 二次处理新题目，以永久题号替代暂时题号
     if os.path.exists(TEMP_FILE_PATH):
         with open(TEMP_FILE_PATH, "r") as f:
-            logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            logger.info(
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             logger.info("Now deal with problems with temporary problem IDs.")
             logger.info("Renaming or deleting would be needed.")
             for line in f.readlines():
@@ -75,8 +93,9 @@ def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
                 if os.path.exists(new_path):
                     # if new path exists, just delete old path
                     logger.info(
-                        "{new_file_name} exists, {old_file_name} will be deleted".format(new_file_name=new_file_name, old_file_name=new_file_name)
-                    )
+                        "{new_file_name} exists, {old_file_name} will be deleted".format(
+                            new_file_name=new_file_name,
+                            old_file_name=new_file_name))
                     os.remove(old_path)
                     os.rmdir(old_dir_path)
                     continue
@@ -85,14 +104,18 @@ def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
                 os.rename(old_dir_path, new_dir_path)
                 os.rename(os.path.join(new_dir_path, old_file_name), new_path)
 
-                logger.info("{old_file_name} has been renamed to {new_file_name}".format(old_file_name=old_file_name, new_file_name=new_file_name))
+                logger.info(
+                    "{old_file_name} has been renamed to {new_file_name}".format(
+                        old_file_name=old_file_name,
+                        new_file_name=new_file_name))
 
         os.remove(TEMP_FILE_PATH)
-        
+
     # 把暂时题号的题目写到本地
     if problems_to_be_reprocessed:
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        logger.info("The following problems have been recoreded to local logs for reprocessing, ")
+        logger.info(
+            "The following problems have been recoreded to local logs for reprocessing, ")
         logger.info("when their permenant problem IDs become available.")
         with open(TEMP_FILE_PATH, "w") as f:
             for title, path in problems_to_be_reprocessed:

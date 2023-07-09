@@ -11,9 +11,11 @@ from src.logger import logger
 # 避免验证 https 证书的报错
 requests.packages.urllib3.disable_warnings()
 
+
 class Crawler:
     CONFIG_PATH = "./configuration/config.json"
     MAPPING_PATH = "./configuration/mapping.json"
+
     def __init__(self, args) -> None:
         requests.packages.urllib3.disable_warnings()
         with open(self.CONFIG_PATH, "r") as f:
@@ -21,7 +23,8 @@ class Crawler:
             self.USERNAME = args.id if args.id else config['username']
             self.PASSWORD = args.password if args.password else config['password']
             self.OUTPUT_DIR = args.output if args.output else config['output_dir']
-            self.TIME_CONTROL = 3600 * 24 * args.day if args.id else 3600 * 24 * config['day']
+            self.TIME_CONTROL = 3600 * 24 * \
+                args.day if args.id else 3600 * 24 * config['day']
             self.OVERWRITE = args.overwrite
             self.REFRESH = args.refresh
             self.START_PAGE = args.startpage
@@ -35,8 +38,12 @@ class Crawler:
         with open(self.MAPPING_PATH, 'r', encoding='utf-8') as f:
             self.MAPPING = json.load(f)
 
-        self.lc = LeetcodeClient(self.USERNAME, self.PASSWORD, self.MAPPING_PATH, logger=logger)
-
+        self.lc = LeetcodeClient(
+            self.USERNAME,
+            self.PASSWORD,
+            self.MAPPING_PATH,
+            logger=logger
+        )
 
     def scraping(self):
         page_num = self.START_PAGE
@@ -45,16 +52,21 @@ class Crawler:
         problems_to_be_reprocessed = []
 
         while True:
-            logger.info('Now scraping for page:{page_num}'.format(page_num=page_num))
+            logger.info(
+                'Now scraping for page:{page_num}'.format(
+                    page_num=page_num
+                )
+            )
             submissions_url = "https://leetcode.cn/api/submissions/?offset={page_num}&limit={limit}".format(
-                page_num=page_num, 
-                limit=self.LIMIT
+                page_num=page_num, limit=self.LIMIT
             )
             html = self.lc.client.get(submissions_url, verify=True)
             html = json.loads(html.text)
 
             if not html.get("submissions_dump"):
-                logger.warning("Notice: No earlier submissions or some errors have occurred!")
+                logger.warning(
+                    "Notice: No earlier submissions or some errors have occurred!"
+                )
                 break
 
             cur_time = time.time()
@@ -65,9 +77,14 @@ class Crawler:
 
                 # 时间记录
                 if cur_time - submission['timestamp'] > self.TIME_CONTROL:
-                    logger.info("Notice: Finished scraping for the preset time.")
+                    logger.info(
+                        "Notice: Finished scraping for the preset time."
+                    )
                     wrap_up_scraping(
-                        not_found_list, problems_to_be_reprocessed, self.MAPPING)
+                        not_found_list,
+                        problems_to_be_reprocessed,
+                        self.MAPPING
+                    )
                     return
 
                 if submission_status != "Accepted":
@@ -77,7 +94,9 @@ class Crawler:
                     problem_id = self.MAPPING.get(problem_title, '0')
                     if problem_id == "0":
                         logger.warning(
-                            "Notice: {problem_title} failed, due to unkown Pid!".format(problem_title=problem_title)
+                            "Notice: {problem_title} failed, due to unkown Pid!".format(
+                                problem_title=problem_title
+                            )
                         )
                         not_found_list.append(problem_title)
                     else:
@@ -86,9 +105,11 @@ class Crawler:
                         if token not in visited:
                             visited.add(token)
                             full_path = generatePath(
-                                problem_id, problem_title, submission_language, self.OUTPUT_DIR)
+                                problem_id, problem_title, submission_language, self.OUTPUT_DIR
+                            )
 
-                            if not self.OVERWRITE and os.path.exists(full_path):
+                            if not self.OVERWRITE and os.path.exists(
+                                    full_path):
                                 continue
 
                             code = self.lc.downloadCode(submission)
@@ -106,11 +127,13 @@ class Crawler:
                                         (filename, full_path))
 
                 except FileNotFoundError as e:
-                    logger.error("FileNotFoundError: Output directory doesn't exist!")
+                    logger.error(
+                        "FileNotFoundError: Output directory doesn't exist!")
                 except TypeError as e:
                     logger.warning("Code is None. Skip.")
                 except Exception as e:
-                    logger.error("Unknwon bug happened, please raise an issue with your log to the writer.")
+                    logger.error(
+                        "Unknwon bug happened, please raise an issue with your log to the writer.")
                     logger.error(type(e))
                     import traceback
                     traceback.print_exc()
@@ -122,7 +145,6 @@ class Crawler:
 
             page_num += self.LIMIT
             time.sleep(self.PAGE_TIME)
-
 
     def execute(self):
         if self.REFRESH:
