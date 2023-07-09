@@ -21,43 +21,7 @@ parser.add_argument('-id', '--id', type=str, help="Your login id")
 parser.add_argument('-pw', '--password', type=str, help="Your login password")
 parser.add_argument('-o', '--output', type=str, help="Output path")
 parser.add_argument('-d', '--day', type=int, help="Fetching codes in 'day'")
-parser.add_argument(
-    '-O',
-    '--overwrite',
-    action='store_true',
-    help="If overwrite output",
-    default=False)
-parser.add_argument(
-    '-R',
-    '--refresh',
-    action='store_true',
-    help="If refresh problam set map",
-    default=False)
-parser.add_argument(
-    '-sp',
-    '--startpage',
-    type=int,
-    help="The page of submissions which to start fetching",
-    default=0)
-parser.add_argument(
-    '-st',
-    '--sleeptime',
-    type=int,
-    help="Sleep time in second after login failed",
-    default=5)
-parser.add_argument(
-    '-pt',
-    '--pagetime',
-    type=int,
-    help="Sleep time in second after page",
-    default=3)
-parser.add_argument(
-    '-l',
-    '--limit',
-    type=int,
-    help="Submissions count in one page",
-    default=20)
-
+parser.add_argument('-O', '--overwrite', action='store_true',  help="Flag to enable overwrite", default=False)
 if __name__ == '__main__':
     args = parser.parse_args()
     Crawler(args).execute()
