@@ -52,41 +52,49 @@ class LeetcodeClient:
         self.logger.info('Starting updating problemset, which might take 2 mins')
         # 定义请求头
         
-
-        mapping = dict()
+        with open(self.MAPPING_FILE, 'r', encoding='utf-8') as f:
+            mapping = json.load(f)
+        with open('query/query_update_problem_sets', 'r') as f:
+            query_string = f.read()
         # 使用大数字来更新题集，100页100个题目数量
-        for i in range(100):
-            data = {'query': '\n    query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $filters: QuestionListFilterInput) {\n  problemsetQuestionList(\n    categorySlug: $categorySlug\n    limit: $limit\n    skip: $skip\n    filters: $filters\n  ) {\n    hasMore\n    total\n    questions {\n      acRate\n      difficulty\n      freqBar\n      frontendQuestionId\n      isFavor\n      paidOnly\n      solutionNum\n      status\n      title\n      titleCn\n      titleSlug\n      topicTags {\n        name\n        nameTranslated\n        id\n        slug\n      }\n      extra {\n        hasVideoSolution\n        topCompanyTags {\n          imgUrl\n          slug\n          numSubscribed\n        }\n      }\n    }\n  }\n}\n    ',
-                    'variables': {
-                        'categorySlug': '',
-                        'skip': i*100,
-                        'limit': 100,
-                        'filters': {}
-                    }
-                    }
-            response = json.loads(
-                self.client.post(self.endpoint + self.GRAPHQL_PATH, headers=self.headers, json=data).content.decode('utf-8')
-            )
-
-            questions = response['data']['problemsetQuestionList']['questions']
+        for i in range(max((len(mapping) // 100)-2, 0), 100):
+            data = {
+                'query': query_string,
+                'variables': {
+                    'categorySlug': '',
+                    'skip': i*100,
+                    'limit': 100,
+                    'filters': {}
+                }
+            }
+            response = self.client.post(self.endpoint + self.GRAPHQL_PATH, json=data, headers=self.headers)
+            questions = response.json()['data']['problemsetQuestionList']['questions']
 
             if not questions:
                 break
 
             for question in questions:
                 mapping[question['titleCn'].replace(" ", "")] = question['frontendQuestionId']
+            
+            print('.', end='', flush=True)
 
         with open(self.MAPPING_FILE, 'w', encoding='utf-8') as f:
             json.dump(mapping, f, ensure_ascii=False)
         self.logger.info('Completed updating problemset \n')
 
     def downloadCode(self, submission) -> str:
-        data = {'operationName': "mySubmissionDetail", "variables": {"id": submission["id"]},
-             'query': 'query mySubmissionDetail($id: ID\u0021) {  submissionDetail(submissionId: $id) {    id    code    runtime    memory    statusDisplay    timestamp    lang    passedTestCaseCnt    totalTestCaseCnt    sourceUrl    question {      titleSlug      title      translatedTitle      questionId      __typename    }    ... on GeneralSubmissionNode {      outputDetail {        codeOutput        expectedOutput        input        compileError        runtimeError        lastTestcase        __typename      }      __typename    }    __typename  }}'
+        with open('query/query_download_submission', 'r') as f:
+            query_string = f.read()
+            
+        data = {
+            'query': query_string,
+            'operationName': "mySubmissionDetail",
+            "variables": {
+                "id": submission["id"]
             }
+        }
 
-        param_json = json.dumps(data).encode("utf-8")
-        response = self.client.post(self.endpoint + self.GRAPHQL_PATH, data=param_json, headers=self.headers)
+        response = self.client.post(self.endpoint + self.GRAPHQL_PATH, json=data, headers=self.headers)
         submission_details = response.json()["data"]["submissionDetail"]
         return submission_details["code"] if submission_details else None
 

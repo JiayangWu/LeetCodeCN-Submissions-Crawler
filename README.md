@@ -21,8 +21,11 @@
 # 使用方法
 1. `clone`或者`download`到本地
 2. 安装依赖库 `pip install -r requirements.txt`
-3. 配置`config.json`文件，用户名，密码，本地存储地址，时间控制（天），是否覆盖已有的题解
+3. 配置`configuration/config.json`文件，用户名，密码，本地存储地址，时间控制（天），是否覆盖已有的题解
 4. 在命令行下运行`python3 main.py`或者使用IDE编译运行
+5. 如果想传入命令行指令，请查看main.py中的相关实现
+6. CML example: python main.py -id <your_id> -pw <your_pw> -o <output_path> -d 100 -sp 0 -st 5 -pt 3 -l 20 -O(输入这个参数以覆写输出) -R(输入这个参数以刷新problem sets)
+7. 如果你配置了`configuration/config.json`那么所有的参数都是可选的，重复配置的参数将以命令行为准
 
 # 项目演示
 ![image](https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler/blob/master/doc/demo.gif)
@@ -38,7 +41,15 @@
 5. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍
-当前版本V3.0，于2023/07/07上传
+当前版本V3.2，于2023/07/09上传
+1. 将GraphQL code提取到单独的文件夹增加可读性
+2. 改进GraphQL code, 更快，少流量
+3. 等待更新Problem sets时，输出字符以鉴别是否卡死
+
+历史版本V3.1，于2023/07/08上传
+1. 添加命令行支持
+
+历史版本V3.0，于2023/07/07上传
 1. 重构代码
 2. 如果输出目录不存在，即使有中间文件夹，也会创建完整路径
 3. 未安装git时，跳过git相关操作
