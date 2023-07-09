@@ -1,0 +1,7 @@
+{
+  "username": "<login_id>",
+  "password": "<password>",
+  "output_dir": "<local_git_repo>",
+  "day": 1000,
+  "overwrite": "False"
+}

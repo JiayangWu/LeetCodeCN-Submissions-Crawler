@@ -25,7 +25,7 @@
 4. 在命令行下运行`python3 main.py`或者使用IDE编译运行
 
 # 项目演示
-![image](https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler/blob/master/demo.gif)
+![image](https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler/blob/master/doc/demo.gif)
 这个GIF是由LICEcap V1.28生成的，[下载地址](https://www.cockos.com/licecap/)
 
 # 一些说明
@@ -38,7 +38,13 @@
 5. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍
-当前版本V2.4，于2023/07/07上传
+当前版本V3.0，于2023/07/07上传
+1. 重构代码
+2. 如果输出目录不存在，即使有中间文件夹，也会创建完整路径
+3. 未安装git时，跳过git相关操作
+
+
+历史版本V2.4，于2023/07/07上传
 1. 输出Log level和时间戳
 2. 修复在Windows上在获取problem set时，不能正确decode的问题
 
