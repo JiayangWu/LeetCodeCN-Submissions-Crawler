@@ -1,6 +1,7 @@
 import os
 import time
-import json
+
+from logger import logger
 
 FILE_FORMAT = {"C++": ".cpp", "Python3": ".py", "Python": ".py", "MySQL": ".sql", "Go": ".go", "Java": ".java",
                "C": ".c", "JavaScript": ".js", "TypeScript": ".ts", "PHP": ".php", "C#": ".cs", "Ruby": ".rb", "Swift": ".swift",
@@ -36,24 +37,24 @@ def gitPush(OUTPUT_DIR):
                     "git commit -m \"" + today + "\"", "git push"]
     for instruction in instructions:
         os.system(instruction)
-        print("~~~~~~~~~~~~~" + instruction + " finished! ~~~~~~~~")
+        logger.info("~~~~~~~~~~~~~" + instruction + " finished! ~~~~~~~~")
 
 
 def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
     if not_found_list:
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("Warning: Writes for following problems failed due to unknown Problem id!")
-        print("This issue can be solved by updating problemset")
+        logger.warning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        logger.warning("Warning: Writes for following problems failed due to unknown Problem id!")
+        logger.warning("This issue can be solved by updating problemset")
         for problem_title in not_found_list:
-            print(problem_title)
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            logger.warning(problem_title)
+        logger.warning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 
     # 二次处理新题目，以永久题号替代暂时题号
     if os.path.exists(TEMP_FILE_PATH):
         with open(TEMP_FILE_PATH, "r") as f:
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            print("Now deal with problems with temporary problem IDs.")
-            print("Renaming or deleting would be needed.")
+            logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            logger.info("Now deal with problems with temporary problem IDs.")
+            logger.info("Renaming or deleting would be needed.")
             for line in f.readlines():
                 title, old_path = line.rstrip().split(" ", 1)
                 old_problem_id, problem_title = title.split("-", 1)
@@ -70,8 +71,9 @@ def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
 
                 if os.path.exists(new_path):
                     # if new path exists, just delete old path
-                    print(
-                        f"{new_file_name} exists, {old_file_name} will be deleted")
+                    logger.info(
+                        "{new_file_name} exists, {old_file_name} will be deleted".format(new_file_name=new_file_name, old_file_name=new_file_name)
+                    )
                     os.remove(old_path)
                     os.rmdir(old_dir_path)
                     continue
@@ -80,17 +82,17 @@ def wrap_up_scraping(not_found_list, problems_to_be_reprocessed, MAPPING):
                 os.rename(old_dir_path, new_dir_path)
                 os.rename(os.path.join(new_dir_path, old_file_name), new_path)
 
-                print(f"{old_file_name} has been renamed to {new_file_name}")
+                logger.info("{old_file_name} has been renamed to {new_file_name}".format(old_file_name=old_file_name, new_file_name=new_file_name))
 
         os.remove(TEMP_FILE_PATH)
         
     # 把暂时题号的题目写到本地
     if problems_to_be_reprocessed:
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("The following problems have been recoreded to local logs for reprocessing, ")
-        print("when their permenant problem IDs become available.")
+        logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        logger.info("The following problems have been recoreded to local logs for reprocessing, ")
+        logger.info("when their permenant problem IDs become available.")
         with open(TEMP_FILE_PATH, "w") as f:
             for title, path in problems_to_be_reprocessed:
                 f.write(title + " " + path + "\n")
-                print(title)
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                logger.info(title)
+        logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")

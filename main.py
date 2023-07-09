@@ -19,6 +19,8 @@ from api.getProblemSet import getProblemSet
 
 from utils import generatePath, gitPush, wrap_up_scraping
 
+from logger import logger
+
 # 避免验证 https 证书的报错
 requests.packages.urllib3.disable_warnings()
 
@@ -65,14 +67,16 @@ def scraping(client):
     problems_to_be_reprocessed = []
 
     while True:
-        print(f'\nNow scraping for page:{page_num}\n')
-        submissions_url = "https://leetcode.cn/api/submissions/?offset={0}&limit={1}".format(
-            page_num, LIMIT)
+        logger.info('Now scraping for page:{page_num}'.format(page_num=page_num))
+        submissions_url = "https://leetcode.cn/api/submissions/?offset={page_num}&limit={limit}".format(
+            page_num=page_num, 
+            limit=LIMIT
+        )
         html = client.get(submissions_url, verify=True)
         html = json.loads(html.text)
 
         if not html.get("submissions_dump"):
-            print("Notice: No earlier submissions or some errors have occurred!")
+            logger.warning("Notice: No earlier submissions or some errors have occurred!")
             break
 
         cur_time = time.time()
@@ -83,7 +87,7 @@ def scraping(client):
 
             # 时间记录
             if cur_time - submission['timestamp'] > TIME_CONTROL:
-                print("Notice: Finished scraping for the preset time.")
+                logger.info("Notice: Finished scraping for the preset time.")
                 wrap_up_scraping(
                     not_found_list, problems_to_be_reprocessed, MAPPING)
                 return
@@ -94,8 +98,9 @@ def scraping(client):
             try:
                 problem_id = MAPPING.get(problem_title, '0')
                 if problem_id == "0":
-                    print(
-                        f"Notice: {problem_title} failed, due to unkown Pid!")
+                    logger.warning(
+                        "Notice: {problem_title} failed, due to unkown Pid!".format(problem_title=problem_title)
+                    )
                     not_found_list.append(problem_title)
                 else:
                     # 保障每道题只记录每种语言最新的AC解
@@ -111,7 +116,7 @@ def scraping(client):
                         code = downloadCode(submission, client)
                         with open(full_path, "w") as f:  # 开始写到本地
                             f.write(code)
-                            print("Writing ends! ", full_path)
+                            logger.info("Writing ends! " + full_path)
 
                         if problem_id[0].isdigit():
                             filename = '{:0>4}'.format(
@@ -122,11 +127,11 @@ def scraping(client):
                                     (filename, full_path))
 
             except FileNotFoundError as e:
-                print("FileNotFoundError: Output directory doesn't exist!")
+                logger.error("FileNotFoundError: Output directory doesn't exist!")
 
             except Exception as e:
-                print(
-                    f"{e}: Unknwon bug happened, please raise an issue with your log to the writer.")
+                logger.error("Unknwon bug happened, please raise an issue with your log to the writer.")
+                logger.error(e)
 
                 # 重新登录解决 NoneType 异常
                 if e.__str__()[:10] == "'NoneType'":
@@ -139,25 +144,25 @@ def scraping(client):
 
 def main(update_problemset=True):
     if update_problemset:
-        getProblemSet()
+        getProblemSet(logger=logger)
 
     if not os.path.exists("mapping.json"):
-        print("Required mapping.json is missing, so the script is unable to proceed.")
+        logger.error("Required mapping.json is missing, so the script is unable to proceed.")
         sys.exit()
 
     init()
 
-    print('Login')
-    client = login(USERNAME, PASSWORD)
+    logger.info('Login')
+    client = login(USERNAME, PASSWORD, logger=logger)
     if not client:
         return
 
-    print('Start scrapping')
+    logger.info('Start scrapping')
     scraping(client)
-    print('End scrapping \n')
+    logger.info('End scrapping \n')
 
     gitPush(OUTPUT_DIR)
-    print('Git push finished')
+    logger.info('Git push finished')
 
 
 if __name__ == '__main__':
