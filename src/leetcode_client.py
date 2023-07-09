@@ -15,7 +15,6 @@ class LeetcodeClient:
             sleep_time=5,
             base_url='https://leetcode.cn/',
             logger=None) -> None:
-        requests.packages.urllib3.disable_warnings()
         self.MAPPING_FILE = MAPPING_FILE
         self.login_id = login_id
         self.password = password
@@ -35,7 +34,7 @@ class LeetcodeClient:
         ATTEMPT = 3
         for try_cnt in range(ATTEMPT):
             login_url = self.endpoint + self.LOGIN_PATH
-            self.client.get(login_url, verify=False)
+            self.client.get(login_url)
             login_data = {
                 'login': self.login_id,
                 'password': self.password

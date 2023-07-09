@@ -14,8 +14,6 @@ import requests
 import argparse
 from src.crawler import Crawler
 
-# 避免验证 https 证书的报错
-requests.packages.urllib3.disable_warnings()
 parser = argparse.ArgumentParser(
     prog='LeetCode-submissions-crawler',
     description='Get all your submissions!')
