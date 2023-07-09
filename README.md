@@ -23,6 +23,7 @@
 2. 安装依赖库 `pip install -r requirements.txt`
 3. 配置`config.json`文件，用户名，密码，本地存储地址，时间控制（天），是否覆盖已有的题解
 4. 在命令行下运行`python3 main.py`或者使用IDE编译运行
+5. 如果想传入命令行指令，请查看main.py中的相关实现
 
 # 项目演示
 ![image](https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler/blob/master/doc/demo.gif)
@@ -38,7 +39,10 @@
 5. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍
-当前版本V3.0，于2023/07/07上传
+当前版本V3.1，于2023/07/08上传
+1. 添加命令行支持
+
+历史版本V3.0，于2023/07/07上传
 1. 重构代码
 2. 如果输出目录不存在，即使有中间文件夹，也会创建完整路径
 3. 未安装git时，跳过git相关操作

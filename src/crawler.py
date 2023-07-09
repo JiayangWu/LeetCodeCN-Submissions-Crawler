@@ -14,24 +14,20 @@ requests.packages.urllib3.disable_warnings()
 class Crawler:
     CONFIG_PATH = "./configuration/config.json"
     MAPPING_PATH = "./configuration/mapping.json"
-    def __init__(self) -> None:
+    def __init__(self, args) -> None:
         requests.packages.urllib3.disable_warnings()
         with open(self.CONFIG_PATH, "r") as f:
             config = json.loads(f.read())
-            self.USERNAME = config['username']
-            self.PASSWORD = config['password']
-            self.OUTPUT_DIR = config['output_dir']
-            self.TIME_CONTROL = 3600 * 24 * config['day']
-            self.OVERWRITE = config['overwrite']
-            # -----------可选参数-----------
-            # 从哪一页submission开始爬起，0 是最新的一页
-            self.START_PAGE = 0
-            # 登录失败时的休眠时间/s
-            self.SLEEP_TIME = 5
-            # 翻页时间
-            self.PAGE_TIME = 3
-            # 一页提交记录数
-            self.LIMIT = 20
+            self.USERNAME = args.id if args.id else config['username']
+            self.PASSWORD = args.password if args.password else config['password']
+            self.OUTPUT_DIR = args.output if args.output else config['output_dir']
+            self.TIME_CONTROL = 3600 * 24 * args.day if args.id else 3600 * 24 * config['day']
+            self.OVERWRITE = args.overwrite
+            self.REFRESH = args.refresh
+            self.START_PAGE = args.startpage
+            self.SLEEP_TIME = args.sleeptime
+            self.PAGE_TIME = args.pagetime
+            self.LIMIT = args.limit
 
         if not os.path.exists(self.OUTPUT_DIR):
             os.makedirs(self.OUTPUT_DIR)
@@ -129,7 +125,8 @@ class Crawler:
 
 
     def execute(self):
-        self.lc.getProblemSet()
+        if self.REFRESH:
+            self.lc.getProblemSet()
 
         logger.info('Login')
         self.lc.login()

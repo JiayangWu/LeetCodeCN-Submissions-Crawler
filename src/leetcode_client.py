@@ -52,10 +52,10 @@ class LeetcodeClient:
         self.logger.info('Starting updating problemset, which might take 2 mins')
         # 定义请求头
         
-
-        mapping = dict()
+        with open(self.MAPPING_FILE, 'r', encoding='utf-8') as f:
+            mapping = json.load(f)
         # 使用大数字来更新题集，100页100个题目数量
-        for i in range(100):
+        for i in range((len(mapping) // 100)-2, 100):
             data = {'query': '\n    query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $filters: QuestionListFilterInput) {\n  problemsetQuestionList(\n    categorySlug: $categorySlug\n    limit: $limit\n    skip: $skip\n    filters: $filters\n  ) {\n    hasMore\n    total\n    questions {\n      acRate\n      difficulty\n      freqBar\n      frontendQuestionId\n      isFavor\n      paidOnly\n      solutionNum\n      status\n      title\n      titleCn\n      titleSlug\n      topicTags {\n        name\n        nameTranslated\n        id\n        slug\n      }\n      extra {\n        hasVideoSolution\n        topCompanyTags {\n          imgUrl\n          slug\n          numSubscribed\n        }\n      }\n    }\n  }\n}\n    ',
                     'variables': {
                         'categorySlug': '',
