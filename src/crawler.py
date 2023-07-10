@@ -23,7 +23,7 @@ class Crawler:
             self.OUTPUT_DIR = args.output if args.output else config['output_dir']
             self.TIME_CONTROL = 3600 * 24 * (args.day if args.day else config['day'])
             self.OVERWRITE = args.overwrite
-
+        self.c = 0
         self.visited = {}
         self.problems_to_be_reprocessed = []
 
@@ -65,6 +65,7 @@ class Crawler:
                 logger.error(e)
                 import traceback
                 traceback.print_exc()
+        return False
 
 
     def process_submission(self, submission):
@@ -74,7 +75,7 @@ class Crawler:
         problem_title = submission_details["question"]["translatedTitle"]
         submission_lang = submission["lang"]
         submission_token = problem_title + submission_lang
-
+        print(submission_token)
         if submission_token not in self.visited:
             self.visited[submission_token] = problem_frontendId
             full_path = generatePath(
@@ -115,6 +116,8 @@ class Crawler:
                         if not self.is_temporary_problem(self.visited[token]):
                             logger.info(path + " is no longer a temporary problem, delete temp code.")
                             os.remove(path)
+                        else:
+                            self.problems_to_be_reprocessed.append((path, title, lang))
 
     def write_temorary_file(self):
         if self.problems_to_be_reprocessed:
@@ -142,7 +145,7 @@ class Crawler:
         logger.info('Start scrapping')
         self.scraping()
         logger.info('End scrapping \n')
-        gitPush(self.OUTPUT_DIR)
+        # gitPush(self.OUTPUT_DIR)
 
 
 if __name__ == '__main__':
