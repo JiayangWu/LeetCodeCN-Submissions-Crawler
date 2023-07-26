@@ -24,8 +24,8 @@
 3. 配置`configuration/config.json`文件，用户名，密码，本地存储地址，时间控制（天），是否覆盖已有的题解
 4. 在命令行下运行`python3 main.py`或者使用IDE编译运行
 5. 如果想传入命令行指令，请查看main.py中的相关实现
-6. CML example: python main.py -id <your_id> -pw <your_pw> -o <output_path> -d 100 -sp 0 -st 5 -pt 3 -l 20 -O(输入这个参数以覆写输出) -R(输入这个参数以刷新problem sets)
-7. 如果你配置了`configuration/config.json`那么所有的参数都是可选的，重复配置的参数将以命令行为准
+6. CML example: python main.py -id <your_id> -pw <your_pw> -o <output_path> -O(输入这个参数以覆写输出)
+7. 如果你配置了`configuration/config.json`那么所有的参数都是可选的，重复配置的参数将以命令行为准（除了OverWrite）
 
 # 项目演示
 ![image](https://github.com/JiayangWu/LeetCodeCN-Submissions-Crawler/blob/master/doc/demo.gif)
@@ -37,11 +37,17 @@
                    "scala": ".scl", "kotlin": ".kt", "rust": ".rs"}`
 2. 致谢@fyears， 本脚本的`login`函数来自https://gist.github.com/fyears/487fc702ba814f0da367a17a2379e8ba
 3. `config.json`里的`day`代表爬多少天之内的`submission`，比如我每天爬今天提交的题解，就是设置为`0.8`就好了，如果第一次使用需要爬所有的题解，就设一个大一点的数比如`1000`之类的。
-4. `config.json`里的`overwrite`代表是否覆盖之前的题解。如果是`True`就代表如果你隔一段时间`AC`了一道题两次，第二次的题解会覆盖第一次的题解。但是你第一次的题解依然可以在`commit`里找到记录。
+4. `config.json`里的`overwrite`代表是否覆盖之前的题解。如果是`True`就代表如果你隔一段时间`AC`了一道题两次，第二次的题解会覆盖第一次的题解。但是你第一次的题解依然可以在`commit`里找到记录。（现在更改为在命令行中输入`-O`开启）
 5. 爬虫教程可以看https://blog.csdn.net/c406495762/column/info/15321
 
 # 版本介绍
-当前版本V3.2，于2023/07/09上传
+当前版本V3.3，于2023/07/09上传
+1. 重构crawler代码
+2. 从GraphQL中获取problem frontend id，不再依赖于Mapping
+3. 更合理的temporary problem提交的处理机制
+4. 减少不必要的命令行参数
+
+历史版本V3.2，于2023/07/09上传
 1. 将GraphQL code提取到单独的文件夹增加可读性
 2. 改进GraphQL code, 更快，少流量
 3. 等待更新Problem sets时，输出字符以鉴别是否卡死

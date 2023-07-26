@@ -4,155 +4,157 @@ import time
 import requests
 from src.leetcode_client import LeetcodeClient
 
-from src.utils import generatePath, gitPush, wrap_up_scraping
+from src.utils import generatePath, gitPush
 
 from src.logger import logger
 
+TEMP_FILE_PATH = "./temp_problemset.txt"
+CONFIG_PATH = "./configuration/config.json"
+LIMIT = 40
+PAGE_TIME = 3
+START_PAGE = 0
+
 
 class Crawler:
-    CONFIG_PATH = "./configuration/config.json"
-    MAPPING_PATH = "./configuration/mapping.json"
-
     def __init__(self, args) -> None:
-        with open(self.CONFIG_PATH, "r") as f:
+        with open(CONFIG_PATH, "r") as f:
             config = json.loads(f.read())
             self.USERNAME = args.id if args.id else config['username']
             self.PASSWORD = args.password if args.password else config['password']
             self.OUTPUT_DIR = args.output if args.output else config['output_dir']
             self.TIME_CONTROL = 3600 * 24 * \
-                args.day if args.id else 3600 * 24 * config['day']
+                (args.day if args.day else config['day'])
             self.OVERWRITE = args.overwrite
-            self.REFRESH = args.refresh
-            self.START_PAGE = args.startpage
-            self.SLEEP_TIME = args.sleeptime
-            self.PAGE_TIME = args.pagetime
-            self.LIMIT = args.limit
+        self.c = 0
+        self.visited = {}
+        self.problems_to_be_reprocessed = []
 
         if not os.path.exists(self.OUTPUT_DIR):
             os.makedirs(self.OUTPUT_DIR)
 
-        with open(self.MAPPING_PATH, 'r', encoding='utf-8') as f:
-            self.MAPPING = json.load(f)
-
         self.lc = LeetcodeClient(
             self.USERNAME,
             self.PASSWORD,
-            self.MAPPING_PATH,
             logger=logger
         )
 
+    def isExpired(self, submission):
+        cur_time = time.time()
+        return cur_time - submission['timestamp'] > self.TIME_CONTROL
+
+    def process_submissions(self, submissions):
+        fail_count = 0
+        for submission in submissions:
+            if submission['status_display'] != "Accepted":
+                continue
+            if self.isExpired(submission):
+                return True
+            try:
+                self.process_submission(submission)
+            except FileNotFoundError as e:
+                logger.error(
+                    "FileNotFoundError: Output directory doesn't exist!")
+            except TypeError as e:
+                if fail_count == 2:
+                    logger.warning(
+                        "Code continually getting None. It may caused by service banning, wait minutes to continue.")
+                    break
+                fail_count += 1
+                logger.warning("Code is None. Skip. Re-login")
+                self.lc.login()
+                time.sleep(PAGE_TIME * 2)
+            except Exception as e:
+                logger.error(
+                    "Unknwon bug happened, please raise an issue with your log to the writer.")
+                logger.error(type(e))
+                logger.error(e)
+                import traceback
+                traceback.print_exc()
+        return False
+
+    def process_submission(self, submission):
+        submission_details = self.lc.downloadCode(submission)
+
+        problem_frontendId = submission_details["question"]["questionFrontendId"]
+        problem_title = submission_details["question"]["translatedTitle"]
+        submission_lang = submission["lang"]
+        submission_token = problem_title + submission_lang
+        # print(submission_token)
+        if submission_token not in self.visited:
+            self.visited[submission_token] = problem_frontendId
+            full_path = generatePath(
+                problem_frontendId, problem_title, submission["lang"], self.OUTPUT_DIR
+            )
+            if not self.OVERWRITE and os.path.exists(full_path):
+                return
+            self.save_code(
+                submission_details["code"], problem_frontendId, problem_title, submission_lang, full_path)
+
+    def save_code(self, code, problem_frontendId, problem_title, submission_lang, full_path):
+        with open(full_path, "w") as f:  # 开始写到本地
+            f.write(code)
+            logger.info("Writing ends! " + full_path)
+            if self.is_temporary_problem(problem_frontendId):
+                self.problems_to_be_reprocessed.append(
+                    (full_path, problem_title, submission_lang))
+
+    def is_temporary_problem(self, problem_frontendId):
+        if problem_frontendId[0].isdigit():
+            format_name = '{:0>4}'.format(
+                problem_frontendId)
+            if format_name[0] >= "6":
+                return True
+        return False
+
+    def process_temporary_problems(self):
+        if os.path.exists(TEMP_FILE_PATH):
+            with open(TEMP_FILE_PATH, "r") as f:
+                for line in f.readlines():
+                    try:
+                        path, title, lang = line.rstrip().split(" ", 1)
+                    except ValueError:
+                        logger.warning("Your " + TEMP_FILE_PATH +
+                                       " is in old format, delete all temp code.")
+                        _, path = line.rstrip().split(" ", 1)
+                        os.remove(path)
+                    token = title + lang
+                    if token in self.visited:
+                        if not self.is_temporary_problem(self.visited[token]):
+                            logger.info(
+                                path + " is no longer a temporary problem, delete temp code.")
+                            os.remove(path)
+                        else:
+                            self.problems_to_be_reprocessed.append(
+                                (path, title, lang))
+
+    def write_temorary_file(self):
+        if self.problems_to_be_reprocessed:
+            with open(TEMP_FILE_PATH, "w") as f:
+                for full_path, problem_title, submission_lang in self.problems_to_be_reprocessed:
+                    f.write(full_path + " " + problem_title +
+                            " " + submission_lang + "\n")
+                    logger.info("Record temporary code: " + full_path)
+
     def scraping(self):
-        page_num = self.START_PAGE
-        visited = set()
-        not_found_list = []
-        problems_to_be_reprocessed = []
-
+        page_num = START_PAGE
         while True:
-            logger.info(
-                'Now scraping for page:{page_num}'.format(
-                    page_num=page_num
-                )
-            )
-            submissions_url = "https://leetcode.cn/api/submissions/?offset={page_num}&limit={limit}".format(
-                page_num=page_num, limit=self.LIMIT
-            )
-            html = self.lc.client.get(submissions_url, verify=True)
-            html = json.loads(html.text)
-
-            if not html.get("submissions_dump"):
-                logger.warning(
-                    "Notice: No earlier submissions or some errors have occurred!"
-                )
+            submission_list = self.lc.getSubmissionList(page_num)
+            expired = self.process_submissions(
+                submission_list["submissions_dump"])
+            if not submission_list.get("has_next") or expired:
+                logger.info("No more submissions!")
                 break
-
-            cur_time = time.time()
-            for submission in html["submissions_dump"]:
-                submission_status = submission['status_display']
-                problem_title = submission['title'].replace(" ", "")
-                submission_language = submission['lang']
-
-                # 时间记录
-                if cur_time - submission['timestamp'] > self.TIME_CONTROL:
-                    logger.info(
-                        "Notice: Finished scraping for the preset time."
-                    )
-                    wrap_up_scraping(
-                        not_found_list,
-                        problems_to_be_reprocessed,
-                        self.MAPPING
-                    )
-                    return
-
-                if submission_status != "Accepted":
-                    continue
-
-                try:
-                    problem_id = self.MAPPING.get(problem_title, '0')
-                    if problem_id == "0":
-                        logger.warning(
-                            "Notice: {problem_title} failed, due to unkown Pid!".format(
-                                problem_title=problem_title
-                            )
-                        )
-                        not_found_list.append(problem_title)
-                    else:
-                        # 保障每道题只记录每种语言最新的AC解
-                        token = problem_id + submission_language
-                        if token not in visited:
-                            visited.add(token)
-                            full_path = generatePath(
-                                problem_id, problem_title, submission_language, self.OUTPUT_DIR
-                            )
-
-                            if not self.OVERWRITE and os.path.exists(
-                                    full_path):
-                                continue
-
-                            code = self.lc.downloadCode(submission)
-
-                            with open(full_path, "w") as f:  # 开始写到本地
-                                f.write(code)
-                                logger.info("Writing ends! " + full_path)
-
-                            if problem_id[0].isdigit():
-                                filename = '{:0>4}'.format(
-                                    problem_id) + "-" + problem_title
-                                # 最新题的暂时题号以6开始, 会在一周以内变成永久题号，所以需要多次处理
-                                if filename[0] >= "6":
-                                    problems_to_be_reprocessed.append(
-                                        (filename, full_path))
-
-                except FileNotFoundError as e:
-                    logger.error(
-                        "FileNotFoundError: Output directory doesn't exist!")
-                except TypeError as e:
-                    logger.warning("Code is None. Skip.")
-                except Exception as e:
-                    logger.error(
-                        "Unknwon bug happened, please raise an issue with your log to the writer.")
-                    logger.error(type(e))
-                    import traceback
-                    traceback.print_exc()
-
-                    # 重新登录解决 NoneType 异常
-                    if e.__str__()[:10] == "'NoneType'":
-                        client = self.lc.login(self.USERNAME, self.PASSWORD)
-                    time.sleep(self.PAGE_TIME * 2)
-
-            page_num += self.LIMIT
-            time.sleep(self.PAGE_TIME)
+            page_num += LIMIT
+            time.sleep(PAGE_TIME)
+        self.process_temporary_problems()
+        self.write_temorary_file()
 
     def execute(self):
-        if self.REFRESH:
-            self.lc.getProblemSet()
-
         logger.info('Login')
         self.lc.login()
-
         logger.info('Start scrapping')
         self.scraping()
         logger.info('End scrapping \n')
-
         gitPush(self.OUTPUT_DIR)
 
 
