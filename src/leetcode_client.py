@@ -10,11 +10,13 @@ class LeetcodeClient:
             self,
             login_id,
             password,
+            cookie,
             sleep_time=5,
             base_url='https://leetcode.cn/',
             logger=None) -> None:
         self.login_id = login_id
         self.password = password
+        self.cookie = cookie
         self.sleep_time = sleep_time
         self.endpoint = base_url
         self.logger = logger
@@ -22,6 +24,7 @@ class LeetcodeClient:
         self.client.encoding = "utf-8"
 
         self.headers = {
+            'Cookie': self.cookie,
             'Connection': 'keep-alive',
             'Content-Type': 'application/json',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'
@@ -36,9 +39,10 @@ class LeetcodeClient:
                 'login': self.login_id,
                 'password': self.password
             }
+            login_header = self.headers
+            login_header['Referer'] = login_url
             result = self.client.post(
-                login_url, data=login_data, headers={
-                    'Referer': login_url})
+                login_url, data=login_data, headers=login_header)
 
             # result.url 判断是否真正登录成功
             if result.ok and result.url == self.endpoint:
