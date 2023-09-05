@@ -17,8 +17,7 @@ from src.crawler import Crawler
 parser = argparse.ArgumentParser(
     prog='LeetCode-submissions-crawler',
     description='Get all your submissions!')
-parser.add_argument('-id', '--id', type=str, help="Your login id")
-parser.add_argument('-pw', '--password', type=str, help="Your login password")
+
 parser.add_argument('-c', '--cookie', type=str, help="Your cookie for login")
 parser.add_argument('-o', '--output', type=str, help="Output path")
 parser.add_argument('-d', '--day', type=int, help="Fetching codes in 'day'")

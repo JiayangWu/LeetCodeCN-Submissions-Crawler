@@ -19,8 +19,6 @@ class Crawler:
     def __init__(self, args) -> None:
         with open(CONFIG_PATH, "r") as f:
             config = json.loads(f.read())
-            self.USERNAME = args.id if args.id else config['username']
-            self.PASSWORD = args.password if args.password else config['password']
             self.COOKIE = args.cookie if args.cookie else config['cookie']
             self.OUTPUT_DIR = args.output if args.output else config['output_dir']
             self.TIME_CONTROL = 3600 * 24 * \
@@ -34,8 +32,6 @@ class Crawler:
             os.makedirs(self.OUTPUT_DIR)
 
         self.lc = LeetcodeClient(
-            self.USERNAME,
-            self.PASSWORD,
             self.COOKIE,
             logger=logger
         )

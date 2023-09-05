@@ -8,14 +8,10 @@ class LeetcodeClient:
 
     def __init__(
             self,
-            login_id,
-            password,
             cookie,
             sleep_time=5,
             base_url='https://leetcode.cn/',
             logger=None) -> None:
-        self.login_id = login_id
-        self.password = password
         self.cookie = cookie
         self.sleep_time = sleep_time
         self.endpoint = base_url
@@ -35,14 +31,11 @@ class LeetcodeClient:
         for try_cnt in range(ATTEMPT):
             login_url = self.endpoint + self.LOGIN_PATH
             self.client.get(login_url)
-            login_data = {
-                'login': self.login_id,
-                'password': self.password
-            }
+
             login_header = self.headers
             login_header['Referer'] = login_url
             result = self.client.post(
-                login_url, data=login_data, headers=login_header)
+                login_url, headers=login_header)
 
             # result.url 判断是否真正登录成功
             if result.ok and result.url == self.endpoint:
@@ -53,11 +46,11 @@ class LeetcodeClient:
                 time.sleep(self.sleep_time)
 
         self.logger.error(
-            "LoginError: Login failed, ensure your username and password is correct!"
+            "LoginError: Login failed, ensure your login credential is correct!"
         )
 
         raise Exception(
-            "LoginError: Login failed, ensure your username and password is correct!")
+            "LoginError: Login failed, ensure your login credential is correct!")
 
     def downloadCode(self, submission) -> str:
         with open('query/query_download_submission', 'r') as f:
@@ -88,5 +81,5 @@ class LeetcodeClient:
             submissions_url = "https://leetcode.cn/api/submissions/?offset={page_num}&limit=40".format(
                 page_num=page_num
             )
-            submissions_list = self.client.get(submissions_url)
+            submissions_list = self.client.get(submissions_url, headers=self.headers)
             return json.loads(submissions_list.text)
