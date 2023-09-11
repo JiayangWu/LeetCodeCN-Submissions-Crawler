@@ -1,6 +1,5 @@
 {
-  "username": "<login_id>",
-  "password": "<password>",
   "output_dir": "<local_git_repo>",
+  "cookie": "<leetcode_cookie>",
   "day": 1000
 }

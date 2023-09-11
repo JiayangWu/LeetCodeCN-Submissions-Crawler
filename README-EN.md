@@ -22,7 +22,7 @@ My problem solution blog(in Chinese): https://blog.csdn.net/qq_32424059
 # Instructions
 1. `clone` or `download` to local environment
 2. Install the dependency library `pip install -r requirements.txt`
-3. Configure the `config.json` file, username, password, local storage address, time control (days)
+3. Configure the `config.json` file, ~~username, password~~, cookie, local storage address, time control (days)
 4. Run `python3 main.py` on the command line or use IDE to compile and run
 
 # Project Demo

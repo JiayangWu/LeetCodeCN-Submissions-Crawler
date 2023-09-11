@@ -19,8 +19,7 @@ class Crawler:
     def __init__(self, args) -> None:
         with open(CONFIG_PATH, "r") as f:
             config = json.loads(f.read())
-            self.USERNAME = args.id if args.id else config['username']
-            self.PASSWORD = args.password if args.password else config['password']
+            self.COOKIE = args.cookie if args.cookie else config['cookie']
             self.OUTPUT_DIR = args.output if args.output else config['output_dir']
             self.TIME_CONTROL = 3600 * 24 * \
                 (args.day if args.day else config['day'])
@@ -33,8 +32,7 @@ class Crawler:
             os.makedirs(self.OUTPUT_DIR)
 
         self.lc = LeetcodeClient(
-            self.USERNAME,
-            self.PASSWORD,
+            self.COOKIE,
             logger=logger
         )
 
@@ -79,7 +77,7 @@ class Crawler:
         problem_title = submission_details["question"]["translatedTitle"]
         submission_lang = submission["lang"]
         submission_token = problem_title + submission_lang
-        # print(submission_token)
+
         if submission_token not in self.visited:
             self.visited[submission_token] = problem_frontendId
             full_path = generatePath(
