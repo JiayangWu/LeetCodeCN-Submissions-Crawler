@@ -77,7 +77,7 @@ class Crawler:
         problem_title = submission_details["question"]["translatedTitle"]
         submission_lang = submission["lang"]
         submission_token = problem_title + submission_lang
-        # print(submission_token)
+
         if submission_token not in self.visited:
             self.visited[submission_token] = problem_frontendId
             full_path = generatePath(
